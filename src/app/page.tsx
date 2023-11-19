@@ -34,13 +34,6 @@ export default function Page() {
   return (
     <>
       <Box>
-        {/*<Tabs*/}
-        {/*  tabs={tabs.map((tab) => ({*/}
-        {/*    label: tab.title,*/}
-        {/*    value: tab.id,*/}
-        {/*  }))}*/}
-        {/*/>*/}
-
         <Box noWrap row>
           {tabs.map((tab) => {
             const isActive = active === tab.id;

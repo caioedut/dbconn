@@ -7,23 +7,42 @@ import {
 import { useObjectState } from 'react-state-hooks';
 
 import { AnyObject, FormRef, RbkFormEvent, useToaster } from '@react-bulk/core';
-import { Animation, Box, Button, Drawer, Form, Grid, Input, Scrollable, Select, Tabs, Text } from '@react-bulk/web';
+import {
+  Animation,
+  Box,
+  Button,
+  Card,
+  Divider,
+  Drawer,
+  Dropdown,
+  Form,
+  Grid,
+  Input,
+  Scrollable,
+  Select,
+  Tabs,
+  Text,
+} from '@react-bulk/web';
 import * as yup from 'yup';
 
 import Icon from '@/components/Icon';
+import List from '@/components/List';
 import Panel from '@/components/Panel';
+import QueryEditor from '@/components/QueryEditor';
 import State from '@/components/State';
 import { getError } from '@/helpers/api.helper';
 import { validate } from '@/helpers/form.helper';
 import { t } from '@/helpers/translate.helper';
 import useApiOnce from '@/hooks/useApiOnce';
 import useConnection from '@/hooks/useConnection';
+import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
 
 import { Connection, Database } from '../../../types/database.type';
 
 export default function ConnectionsDrawer() {
   const toaster = useToaster();
+  const { add } = useTabs();
 
   const { connection, database, setConnection, setDatabase } = useConnection();
 
@@ -32,6 +51,8 @@ export default function ConnectionsDrawer() {
   const [isConnecting, updateIsConnecting] = useObjectState<{ [key: string]: boolean }>({});
 
   const [tablesTab, setTablesTab] = useState<any>('table');
+
+  const [tableMenu, setTableMenu] = useState<string>();
 
   const {
     data: connections,
@@ -148,6 +169,22 @@ export default function ConnectionsDrawer() {
       } catch (err) {
         toaster.error(getError(err));
       }
+    }
+  };
+
+  const handleSelectTop = async (e: Event, tableName: string, limit: number) => {
+    e.stopPropagation();
+
+    setTableMenu(undefined);
+
+    try {
+      const response = await api.get('/query/topQuery', connection?.id, tableName, limit);
+
+      add({
+        render: () => <QueryEditor autoRun sql={response.data} />,
+      });
+    } catch (err) {
+      toaster.error(getError(err));
     }
   };
 
@@ -308,12 +345,51 @@ export default function ConnectionsDrawer() {
                         <Text flex ml={2} numberOfLines={1}>
                           {table.name}
                         </Text>
-                        <Button circular size="xsmall" title="SELECT TOP 10" variant="text">
+                        <Button
+                          circular
+                          size="xsmall"
+                          title="SELECT TOP 10"
+                          variant="text"
+                          onPress={(e: Event) => handleSelectTop(e, table.name, 10)}
+                        >
                           10
                         </Button>
-                        <Button circular size="xsmall" title={`${t('More')}...`} variant="text">
+                        <Button
+                          circular
+                          size="xsmall"
+                          title={`${t('More')}...`}
+                          variant="text"
+                          onPress={() => setTableMenu(table.name)}
+                        >
                           <Icon name="Menu" />
                         </Button>
+                        <Dropdown visible={table.name === tableMenu} onClose={() => setTableMenu(undefined)}>
+                          <List
+                            corners={1}
+                            items={[
+                              {
+                                label: 'SELECT TOP 100',
+                                icon: 'Code',
+                                onPress: (e: Event) => handleSelectTop(e, table.name, 100),
+                              },
+                              {
+                                label: 'SELECT TOP 1000',
+                                icon: 'Code',
+                                onPress: (e: Event) => handleSelectTop(e, table.name, 1000),
+                              },
+                              { divider: true },
+                            ]}
+                            overflow="hidden"
+                            w={200}
+                          />
+                          {/*<Card p={0} w={160}>*/}
+                          {/*  <Box p={2}>SELECT TOP 100</Box>*/}
+                          {/*  <Box>SELECT TOP 1000</Box>*/}
+                          {/*  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Commodi est nam quas quis*/}
+                          {/*  voluptatem. Ad aperiam consequuntur, eaque est, excepturi laborum nemo non odio praesentium*/}
+                          {/*  provident quidem reprehenderit sapiente voluptate.*/}
+                          {/*</Card>*/}
+                        </Dropdown>
                       </Box>
                     </Box>
                   ))}

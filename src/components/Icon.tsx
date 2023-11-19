@@ -1,15 +1,15 @@
 import * as icons from 'react-feather';
 
-import { RbkColor, useTheme } from '@react-bulk/core';
+import { BoxProps, RbkColor, useTheme } from '@react-bulk/core';
 import { Box } from '@react-bulk/web';
 
-export type IconProps = {
+export type IconProps = BoxProps & {
   color?: RbkColor;
   name: string;
   size?: number | string;
 };
 
-export default function Icon({ name, color, size }: IconProps) {
+export default function Icon({ name, color, size, ...rest }: IconProps) {
   const theme = useTheme();
 
   color = theme.color(color ?? 'primary');
@@ -22,5 +22,5 @@ export default function Icon({ name, color, size }: IconProps) {
     return <Box h={size} w={size} />;
   }
 
-  return <Component color={color} size={size} />;
+  return <Box component={Component} color={color} size={size} {...rest} />;
 }

@@ -14,7 +14,7 @@ type Tab = {
 
 const TabsContext = createContext<{
   active: string;
-  add: (tab?: Tab) => void;
+  add: (tab?: Partial<Omit<Tab, 'id'>>) => string;
   close: (tabId: string) => void;
   setActive: Dispatch<SetStateAction<string>>;
   tabs: Tab[];
@@ -23,7 +23,7 @@ const TabsContext = createContext<{
 const defaultTab = {
   id: '0',
   title: 'Query',
-  render: () => <QueryEditor sql="SELECT * FROM user" />,
+  render: () => <QueryEditor />,
 };
 
 function TabsProvider({ children }: any) {
@@ -31,19 +31,22 @@ function TabsProvider({ children }: any) {
 
   const [tabs, { push, remove }] = useListState<Tab>([defaultTab]);
 
-  const add = (tab?: Tab) => {
+  const add = (tab?: Partial<Omit<Tab, 'id'>>) => {
     const id = uuid();
-    push(tab ?? { ...defaultTab, id });
+    push({ ...defaultTab, ...tab, id });
     setActive(id);
+    return id;
   };
 
   const close = (tabId: string) => {
-    const index = tabs.findIndex((item) => item.id === tabId);
-    const prev = tabs[index - 1];
-    const next = tabs[index + 1];
+    if (tabId === active) {
+      const index = tabs.findIndex((item) => item.id === tabId);
+      const prev = tabs[index - 1];
+      const next = tabs[index + 1];
+      setActive(prev?.id ?? next?.id ?? defaultTab.id);
+    }
 
     remove((item) => item.id === tabId);
-    setActive(prev?.id ?? next?.id ?? defaultTab.id);
   };
 
   useEffect(() => {

@@ -28,7 +28,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <Scrollable p={1}>
+    <Scrollable contentInset={1}>
       {links.map((link, index) => {
         const isSelected = `/${segment ?? ''}` === link.url;
 

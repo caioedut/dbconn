@@ -31,6 +31,7 @@ const tokens = {
     Structs: 'Estruturas',
     Tables: 'Tabelas',
     Test: 'Testar',
+    Theme: 'Tema',
     Type: 'Tipo',
     Username: 'Usuário',
   },

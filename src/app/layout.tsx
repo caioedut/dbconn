@@ -20,15 +20,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ConnectionProvider>
             <TabsProvider>
               <Box noWrap row className={RobotoFont.className} h="100%">
-                <Box bg="background.secondary">
+                <Box bg="background.primary">
                   <Sidebar />
                 </Box>
-                <Box bg="background.primary" w={320}>
+                <Box w={320}>
                   <Drawer />
                 </Box>
-                <Scrollable flex bg="background.secondary">
-                  {children}
-                </Scrollable>
+                <Box flex>{children}</Box>
               </Box>
             </TabsProvider>
           </ConnectionProvider>

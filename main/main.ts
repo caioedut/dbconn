@@ -55,6 +55,8 @@ const createWindow = () => {
     },
   });
 
+  win.setMenuBarVisibility(false);
+
   // Expose URL
   if (isProd) {
     win.loadURL('app://./home.html');

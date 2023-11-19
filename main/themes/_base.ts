@@ -1,10 +1,6 @@
 import { ThemeEditProps } from '@react-bulk/core';
 
 const base: ThemeEditProps = {
-  typography: {
-    fontSize: 14,
-  },
-
   components: {
     // Backdrop: {
     //   defaultStyles: {
@@ -18,6 +14,10 @@ const base: ThemeEditProps = {
         corners: 0,
       },
     },
+  },
+
+  typography: {
+    fontSize: 14,
   },
 };
 

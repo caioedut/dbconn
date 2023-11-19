@@ -2,18 +2,18 @@ import { ThemeEditProps } from '@react-bulk/core';
 
 import base from './_base';
 
-const dark: ThemeEditProps = {
+const light: ThemeEditProps = {
   ...base,
 
   colors: {
-    primary: '#2196f3',
+    primary: '#3f51b5',
   },
 
   custom: {
-    id: 'dark',
+    id: 'light',
   },
 
-  mode: 'dark',
+  mode: 'light',
 };
 
-export default dark;
+export default light;

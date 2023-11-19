@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Panel as ResizablePanel,
   PanelGroup as ResizablePanelGroup,
@@ -19,24 +19,25 @@ import api from '@/services/api';
 import { Result } from '../../types/database.type';
 
 export type QueryEditorProps = {
+  autoRun?: boolean;
   sql?: string;
 };
 
-export default function QueryEditor({ sql }: QueryEditorProps) {
+export default function QueryEditor({ autoRun, sql }: QueryEditorProps) {
   const toaster = useToaster();
   const { connection, database } = useConnection();
 
-  const editorRef = useRef();
+  const editorRef = useRef<HTMLDivElement>();
 
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<Result[]>();
 
-  const sendQuery = async (e: any) => {
+  const sendQuery = async () => {
     setIsLoading(true);
     setResults(undefined);
 
     const selection = window.getSelection();
-    const text = selection?.toString() || e.target?.innerText || '';
+    const text = selection?.toString() || editorRef.current?.innerText || '';
 
     try {
       const response = await api.post('/query', connection?.id, text);
@@ -48,9 +49,19 @@ export default function QueryEditor({ sql }: QueryEditorProps) {
     setIsLoading(false);
   };
 
+  useEffect(() => {
+    if (editorRef) {
+      editorRef.current?.focus();
+
+      if (autoRun) {
+        sendQuery();
+      }
+    }
+  }, [editorRef]);
+
   const handleKeyDown = (e: any) => {
     if (e.key === 'Enter' && e.ctrlKey) {
-      sendQuery(e);
+      sendQuery();
     }
   };
 

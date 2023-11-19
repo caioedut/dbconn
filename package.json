@@ -21,8 +21,8 @@
     "dist": "npm run build && electron-builder"
   },
   "dependencies": {
-    "@react-bulk/core": "^0.5.3",
-    "@react-bulk/web": "^0.5.3",
+    "@react-bulk/core": "^0.6.0",
+    "@react-bulk/web": "^0.6.0",
     "@types/electron": "^1.6.10",
     "@types/node": "^20.6.0",
     "@types/react": "^18.2.21",
