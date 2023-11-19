@@ -7,21 +7,20 @@ import {
 import { useObjectState } from 'react-state-hooks';
 
 import { AnyObject, FormRef, RbkFormEvent, useToaster } from '@react-bulk/core';
-import { Animation, Box, Button, Collapse, Drawer, Form, Grid, Input, Scrollable, Select, Text } from '@react-bulk/web';
+import { Animation, Box, Button, Drawer, Form, Grid, Input, Scrollable, Select, Tabs, Text } from '@react-bulk/web';
 import * as yup from 'yup';
 
 import Icon from '@/components/Icon';
 import Panel from '@/components/Panel';
 import State from '@/components/State';
 import { getError } from '@/helpers/api.helper';
-import { groupBy } from '@/helpers/array.helper';
 import { validate } from '@/helpers/form.helper';
 import { t } from '@/helpers/translate.helper';
 import useApiOnce from '@/hooks/useApiOnce';
 import useConnection from '@/hooks/useConnection';
 import api from '@/services/api';
 
-import { Connection, Database, Table } from '../../../types/database.type';
+import { Connection, Database } from '../../../types/database.type';
 
 export default function DrawerConnections() {
   const toaster = useToaster();
@@ -32,7 +31,7 @@ export default function DrawerConnections() {
 
   const [isConnecting, updateIsConnecting] = useObjectState<{ [key: string]: boolean }>({});
 
-  const [showTableGroup, updateShowTableGroup] = useObjectState<{ [key: string]: boolean }>({});
+  const [tablesTab, setTablesTab] = useState<any>('table');
 
   const {
     data: connections,
@@ -158,7 +157,7 @@ export default function DrawerConnections() {
         <ResizablePanel collapsible>
           <Panel
             h="100%"
-            loading={isValidatingConnections}
+            loading={isValidatingConnections || isValidatingDatabases}
             right={
               <Button circular size="xsmall" title={t('Add')} variant="text" onPress={() => setEditModel({})}>
                 <Icon name="PlusCircle" />
@@ -167,7 +166,7 @@ export default function DrawerConnections() {
             title={t('Connections')}
           >
             <State error={errorConnections}>
-              <Box mx={-2}>
+              <Scrollable>
                 {connections?.map((conn, index) => {
                   const isConnSelected = conn.id === connection?.id;
 
@@ -265,7 +264,7 @@ export default function DrawerConnections() {
                     </Box>
                   );
                 })}
-              </Box>
+              </Scrollable>
             </State>
           </Panel>
         </ResizablePanel>
@@ -281,60 +280,44 @@ export default function DrawerConnections() {
                 <Icon name="RefreshCw" />
               </Button>
             }
-            title={`${t('Tables')} / ${t('Views')} / ${t('Procedures')} / ${t('Functions')}`}
+            title={t('Structs')}
           >
             <State error={errorTables}>
-              <Box mx={-2}>
-                {groupBy<Table>(tables || [], 'type')?.map((group) => {
-                  const isGroupExpanded = showTableGroup[group.key];
+              <Box center p={2}>
+                <Tabs
+                  size="small"
+                  tabs={[
+                    { label: t('Tables'), value: 'table' },
+                    { label: t('Views'), value: 'view' },
+                  ]}
+                  value={tablesTab}
+                  variant="nav"
+                  onChange={(e, value) => setTablesTab(value)}
+                />
+              </Box>
 
-                  return (
-                    <Box key={group.key}>
-                      <Box
-                        noWrap
-                        row
-                        alignItems="center"
-                        p={2}
-                        onPress={() => updateShowTableGroup({ [group.key]: !isGroupExpanded })}
-                      >
-                        <Text bold transform="capitalize">
-                          {t(`${group.title}s`)}
+              <Scrollable>
+                {tables
+                  ?.filter((table) => table.type === tablesTab)
+                  ?.map((table) => (
+                    <Box key={table.name} style={{ '&:hover': { bg: 'primary.main.25' } }}>
+                      <Box center noWrap row p={1}>
+                        <Box h={12} ml={1} w={12}>
+                          <Icon name="Table" size={12} />
+                        </Box>
+                        <Text flex ml={2} numberOfLines={1}>
+                          {table.name}
                         </Text>
-                        <Button
-                          circular
-                          ml={1}
-                          size="xsmall"
-                          title={t(isGroupExpanded ? 'Hide' : 'Show')}
-                          variant="text"
-                        >
-                          <Icon name={isGroupExpanded ? 'ChevronUp' : 'ChevronDown'} size={12} />
+                        <Button circular size="xsmall" title="SELECT TOP 10" variant="text">
+                          10
+                        </Button>
+                        <Button circular size="xsmall" title={`${t('More')}...`} variant="text">
+                          <Icon name="Menu" />
                         </Button>
                       </Box>
-
-                      <Collapse visible={isGroupExpanded}>
-                        {group.data.map((table) => (
-                          <Box key={table.name} style={{ '&:hover': { bg: 'primary.main.25' } }}>
-                            <Box center noWrap row p={1}>
-                              <Box h={12} ml={1} w={12}>
-                                <Icon name="Table" size={12} />
-                              </Box>
-                              <Text flex ml={2} numberOfLines={1}>
-                                {table.name}
-                              </Text>
-                              <Button circular size="xsmall" title="SELECT TOP 10" variant="text">
-                                10
-                              </Button>
-                              <Button circular size="xsmall" title={`${t('More')}...`} variant="text">
-                                <Icon name="Menu" />
-                              </Button>
-                            </Box>
-                          </Box>
-                        ))}
-                      </Collapse>
                     </Box>
-                  );
-                })}
-              </Box>
+                  ))}
+              </Scrollable>
             </State>
           </Panel>
         </ResizablePanel>

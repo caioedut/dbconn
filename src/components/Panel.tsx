@@ -1,23 +1,22 @@
-import { ReactElement, ScrollableProps } from '@react-bulk/core';
-import { Box, Card, Divider, Progress, Scrollable, Text } from '@react-bulk/web';
+import { BoxProps, ReactElement } from '@react-bulk/core';
+import { Box, Divider, Progress, Text } from '@react-bulk/web';
 
-export type PanelProps = ScrollableProps & {
+export type PanelProps = BoxProps & {
   loading?: boolean;
   right?: ReactElement;
   title?: string;
 };
 
-export default function Panel({ title, children, flex, loading, right, style, ...rest }: PanelProps) {
+export default function Panel({ title, children, loading, right, style, ...rest }: PanelProps) {
   return (
-    <Scrollable
+    <Box
       bg="background.secondary"
       border="1px solid primary"
-      flex={flex}
       position="relative"
       style={[{ '&:not(:first-child)': { mt: 1 } }, style]}
       {...rest}
     >
-      <Box bg="background.secondary" p={2} position="sticky" t={0} zIndex={1}>
+      <Box bg="background.primary" p={2} zIndex={1}>
         <Box noWrap row>
           <Text bold flex numberOfLines={1} transform="uppercase" variant="secondary">
             {title}
@@ -34,9 +33,7 @@ export default function Panel({ title, children, flex, loading, right, style, ..
         </Box>
       </Box>
 
-      <Box flex p={2}>
-        {children}
-      </Box>
-    </Scrollable>
+      {children}
+    </Box>
   );
 }

@@ -25,6 +25,7 @@ const tokens = {
     Server: 'Servidor',
     Show: 'Mostrar',
     'Something went wrong': 'Houve um erro inesperado',
+    Structs: 'Estruturas',
     Tables: 'Tabelas',
     Test: 'Testar',
     Type: 'Tipo',

@@ -73,27 +73,28 @@ export default function QueryEditor() {
               database ? ` / ${database?.name}` : ''
             }`}
           >
-            <Box
-              ref={editorRef}
-              contentEditable
-              noRootStyles
-              suppressContentEditableWarning
-              autoCapitalize="none"
-              autoCorrect="off"
-              className={font.className}
-              h="100%"
-              m={-2}
-              p={2}
-              spellCheck={false}
-              style={{
-                letterSpacing: 0.5,
-                lineHeight: 1.35,
-                outline: 'none !important',
-              }}
-              onKeyDown={handleKeyDown}
-            >
-              SELECT * FROM user
-            </Box>
+            <Scrollable>
+              <Box
+                ref={editorRef}
+                contentEditable
+                noRootStyles
+                suppressContentEditableWarning
+                autoCapitalize="none"
+                autoCorrect="off"
+                className={font.className}
+                h="100%"
+                p={2}
+                spellCheck={false}
+                style={{
+                  letterSpacing: 0.5,
+                  lineHeight: 1.35,
+                  outline: 'none !important',
+                }}
+                onKeyDown={handleKeyDown}
+              >
+                SELECT * FROM user
+              </Box>
+            </Scrollable>
           </Panel>
         </ResizablePanel>
 
@@ -101,60 +102,58 @@ export default function QueryEditor() {
 
         <ResizablePanel collapsible>
           <Panel h="100%" title={t('Results')}>
-            <Box m={-2}>
-              {results?.map(({ fields, rows }, index) => (
-                <Scrollable key={index} direction="horizontal" mb={2}>
-                  <Box component="table" noRootStyles minw="100%" style={{ borderCollapse: 'collapse' }}>
-                    <Box component="thead" noRootStyles bg="background">
-                      <tr>
-                        <Box component="th" noRootStyles style={[thStyle, cellStyle]}>
-                          #
+            {results?.map(({ fields, rows }, index) => (
+              <Scrollable key={index} mb={2} style={{ overflow: 'auto' }}>
+                <Box component="table" noRootStyles minw="100%" style={{ borderCollapse: 'collapse' }}>
+                  <Box component="thead" noRootStyles bg="background" position="sticky" t={0}>
+                    <tr>
+                      <Box component="th" noRootStyles style={[thStyle, cellStyle]}>
+                        #
+                      </Box>
+                      {fields.map((field, fieldIndex) => (
+                        <Box key={fieldIndex} component="th" noRootStyles style={[thStyle, cellStyle]}>
+                          {field}
                         </Box>
-                        {fields.map((field, fieldIndex) => (
-                          <Box key={fieldIndex} component="th" noRootStyles style={[thStyle, cellStyle]}>
-                            {field}
-                          </Box>
-                        ))}
-                      </tr>
-                    </Box>
-                    <tbody>
-                      {rows.map((row, rowIndex) => (
-                        <tr key={rowIndex}>
-                          <Box component="th" noRootStyles style={[thStyle, cellStyle]}>
-                            {rowIndex + 1}
-                          </Box>
-                          {fields.map((field, fieldIndex) => {
-                            const selectionKey = `${index}_${rowIndex}_${fieldIndex}`;
-                            const isSelected = selectionKey === resultsSelected;
-
-                            return (
-                              <Box
-                                key={fieldIndex}
-                                component="td"
-                                noRootStyles
-                                bg={isSelected ? 'primary.main.35' : undefined}
-                                style={cellStyle}
-                                onPress={() => setResultsSelected(selectionKey)}
-                              >
-                                <Text numberOfLines={1} variant="secondary">
-                                  {row?.[field] instanceof Date
-                                    ? row?.[field].toISOString()
-                                    : row?.[field] ?? (
-                                        <Text italic color="text.disabled">
-                                          NULL
-                                        </Text>
-                                      )}
-                                </Text>
-                              </Box>
-                            );
-                          })}
-                        </tr>
                       ))}
-                    </tbody>
+                    </tr>
                   </Box>
-                </Scrollable>
-              ))}
-            </Box>
+                  <tbody>
+                    {rows.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        <Box component="th" noRootStyles style={[thStyle, cellStyle]}>
+                          {rowIndex + 1}
+                        </Box>
+                        {fields.map((field, fieldIndex) => {
+                          const selectionKey = `${index}_${rowIndex}_${fieldIndex}`;
+                          const isSelected = selectionKey === resultsSelected;
+
+                          return (
+                            <Box
+                              key={fieldIndex}
+                              component="td"
+                              noRootStyles
+                              bg={isSelected ? 'primary.main.35' : undefined}
+                              style={cellStyle}
+                              onPress={() => setResultsSelected(selectionKey)}
+                            >
+                              <Text numberOfLines={1} variant="secondary">
+                                {row?.[field] instanceof Date
+                                  ? row?.[field].toISOString()
+                                  : row?.[field] ?? (
+                                      <Text italic color="text.disabled">
+                                        NULL
+                                      </Text>
+                                    )}
+                              </Text>
+                            </Box>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </Box>
+              </Scrollable>
+            ))}
           </Panel>
         </ResizablePanel>
       </ResizablePanelGroup>
