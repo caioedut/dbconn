@@ -20,6 +20,9 @@ const TabsContext = createContext<{
   active: string;
   add: (tab?: Partial<Omit<Tab, 'id'>>) => string;
   close: (tabId: string) => void;
+  goTo: (index: number) => void;
+  goToNext: () => void;
+  goToPrev: () => void;
   setActive: Dispatch<SetStateAction<string>>;
   setConnection: (tabId: string, connection?: Connection) => void;
   setDatabase: (tabId: string, database?: Database) => void;
@@ -98,12 +101,33 @@ function TabsProvider({ children }: any) {
     [setProp],
   );
 
+  const goTo = useCallback(
+    (index: number) => {
+      const tabId = tabs[index]?.id;
+      tabId && setActive(tabId);
+    },
+    [tabs],
+  );
+
+  const goToNext = useCallback(() => {
+    const index = tabs.findIndex((item) => item.id === active);
+    goTo(index === tabs.length - 1 ? 0 : index + 1);
+  }, [tabs, active, goTo]);
+
+  const goToPrev = useCallback(() => {
+    const index = tabs.findIndex((item) => item.id === active);
+    goTo((index === 0 ? tabs.length : index) - 1);
+  }, [tabs, active, goTo]);
+
   return (
     <TabsContext.Provider
       value={{
         active,
         add,
         close,
+        goTo,
+        goToNext,
+        goToPrev,
         setActive,
         setConnection,
         setDatabase,

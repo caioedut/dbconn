@@ -1,6 +1,6 @@
 'use client';
 
-import ReactBulk, { Box, Scrollable } from '@react-bulk/web';
+import ReactBulk, { Box } from '@react-bulk/web';
 
 import Drawer from '@/components/Drawer';
 import Sidebar from '@/components/Sidebar';

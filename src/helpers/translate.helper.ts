@@ -4,6 +4,7 @@ import { AnyObject } from '@react-bulk/core';
 const tokens = {
   'pt-BR': {
     Add: 'Adicionar',
+    Alias: 'Apelido',
     Cancel: 'Cancelar',
     Close: 'Fechar',
     Connect: 'Conectar',

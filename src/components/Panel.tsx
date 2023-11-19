@@ -37,7 +37,11 @@ export default function Panel({ title, children, loading, right, style, ...rest 
         </Box>
       )}
 
-      {loading ? <Progress corners={0} h={1} /> : <Divider color="primary" opacity={1} />}
+      {loading ? (
+        <Progress barStyle={{ borderRadius: '25%' }} color={theme.contrast('primary')} corners={0} h={1} />
+      ) : (
+        <Divider color="primary" opacity={1} />
+      )}
 
       {children}
     </Box>

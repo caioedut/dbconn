@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Panel as ResizablePanel,
   PanelGroup as ResizablePanelGroup,
@@ -32,6 +32,7 @@ import { validate } from '@/helpers/form.helper';
 import { t } from '@/helpers/translate.helper';
 import useApiOnce from '@/hooks/useApiOnce';
 import useConnection from '@/hooks/useConnection';
+import useHotkey from '@/hooks/useHotkey';
 import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
 
@@ -41,15 +42,27 @@ export default function ConnectionsDrawer() {
   const toaster = useToaster();
   const { add } = useTabs();
 
-  const { connection, database, setConnection, setDatabase } = useConnection();
+  const formConnectionRef = useRef<FormRef>();
 
-  const [editModel, setEditModel] = useState<Partial<Connection>>();
+  const { connection, database, setConnection, setDatabase } = useConnection();
 
   const [isConnecting, updateIsConnecting] = useObjectState<{ [key: string]: boolean }>({});
 
-  const [tablesTab, setTablesTab] = useState<any>('table');
+  const [tablesTab, setTablesTab] = useState<'table' | 'view'>('table');
 
   const [tableMenu, setTableMenu] = useState<string>();
+
+  const [editModel, setEditModel] = useState<Partial<Connection>>();
+
+  const [editType, setEditType] = useState<string>();
+
+  const [editRequired, updateEditRequired] = useObjectState({
+    database: true,
+    host: true,
+    password: true,
+    port: true,
+    username: true,
+  });
 
   const {
     data: connections,
@@ -72,14 +85,37 @@ export default function ConnectionsDrawer() {
     mutate: mutateTables,
   } = useApiOnce<any[]>(connection && database && '/tables', connection?.id, database?.name);
 
-  const handleCancelConnection = (form: FormRef) => {
-    setEditModel(undefined);
-    form.setErrors(null);
+  const displayTablesHk = useHotkey({
+    callback: () => setTablesTab('table'),
+    ctrl: true,
+    key: 'F1',
+  });
+
+  const displayViewsHk = useHotkey({
+    callback: () => setTablesTab('view'),
+    ctrl: true,
+    key: 'F2',
+  });
+
+  const handleChangeType = (type: string) => {
+    setEditType(type);
+
+    updateEditRequired({
+      database: type === 'pg',
+      password: type !== 'mysql',
+    });
   };
 
   const handleEditConnection = (e: Event, conn: Connection) => {
     e.stopPropagation();
     setEditModel(conn);
+    handleChangeType(conn.type);
+  };
+
+  const handleCancelEditConnection = () => {
+    setEditModel(undefined);
+    formConnectionRef.current?.clear();
+    formConnectionRef.current?.setErrors(null);
   };
 
   const handleDeleteConnection = async (e: Event, conn: Connection) => {
@@ -99,11 +135,12 @@ export default function ConnectionsDrawer() {
 
   const handleSaveConnection = async (e: RbkFormEvent, data: AnyObject) => {
     const errors = await validate(data, {
-      host: yup.string().required(),
-      // password: yup.string().required(),
-      port: yup.string().required(),
+      database: editRequired.database ? yup.string().required() : yup.string().nullable(),
+      host: editRequired.host ? yup.string().required() : yup.string().nullable(),
+      password: editRequired.password ? yup.string().required() : yup.string().nullable(),
+      port: editRequired.port ? yup.string().required() : yup.string().nullable(),
       type: yup.string().required(),
-      username: yup.string().required(),
+      username: editRequired.username ? yup.string().required() : yup.string().nullable(),
     });
 
     e.form.setErrors(errors);
@@ -116,8 +153,7 @@ export default function ConnectionsDrawer() {
       toaster.error(getError(err));
     }
 
-    setEditModel(undefined);
-    e.form.clear();
+    handleCancelEditConnection();
   };
 
   const handleConnect = async (e: Event, conn: Connection) => {
@@ -188,6 +224,17 @@ export default function ConnectionsDrawer() {
     }
   };
 
+  const newConnHk = useHotkey({
+    callback: () => setEditModel({}),
+    ctrl: true,
+    key: 'n',
+  });
+
+  useHotkey({
+    callback: () => editModel && handleCancelEditConnection(),
+    key: 'Escape',
+  });
+
   return (
     <>
       <ResizablePanelGroup autoSaveId="example" direction="vertical">
@@ -196,7 +243,13 @@ export default function ConnectionsDrawer() {
             h="100%"
             loading={isValidatingConnections || isValidatingDatabases}
             right={
-              <Button circular size="xsmall" title={t('Add')} variant="text" onPress={() => setEditModel({})}>
+              <Button
+                circular
+                size="xsmall"
+                title={`${t('Add')} ${newConnHk.title}`}
+                variant="text"
+                onPress={() => setEditModel({})}
+              >
                 <Icon color="contrast" name="PlusCircle" />
               </Button>
             }
@@ -324,12 +377,12 @@ export default function ConnectionsDrawer() {
                 <Tabs
                   size="small"
                   tabs={[
-                    { label: t('Tables'), value: 'table' },
-                    { label: t('Views'), value: 'view' },
+                    { title: displayTablesHk.title, label: t('Tables'), value: 'table' },
+                    { title: displayViewsHk.title, label: t('Views'), value: 'view' },
                   ]}
                   value={tablesTab}
                   variant="nav"
-                  onChange={(e, value) => setTablesTab(value)}
+                  onChange={(_, value: any) => setTablesTab(value)}
                 />
               </Box>
 
@@ -393,7 +446,7 @@ export default function ConnectionsDrawer() {
       </ResizablePanelGroup>
 
       <Drawer visible={Boolean(editModel)}>
-        <Form flex onCancel={handleCancelConnection} onSubmit={handleSaveConnection}>
+        <Form ref={formConnectionRef} flex onCancel={handleCancelEditConnection} onSubmit={handleSaveConnection}>
           <Input name="id" type="hidden" value={editModel?.id} />
 
           <Scrollable contentInset={4} maxw="100%" w={400}>
@@ -409,23 +462,45 @@ export default function ConnectionsDrawer() {
                     { label: 'Oracle', value: 'oracledb' },
                   ]}
                   value={editModel?.type}
+                  onChange={(_, value) => handleChangeType(value)}
                 />
               </Box>
-              <Box xs={8}>
-                <Input label={t('Server *')} name="host" value={editModel?.host} />
-              </Box>
-              <Box xs={4}>
-                <Input label={t('Port *')} name="port" value={editModel?.port} />
-              </Box>
-              <Box xs={12}>
-                <Input label={t('Username *')} name="username" value={editModel?.username} />
-              </Box>
-              <Box xs={12}>
-                <Input notNull label={t('Password *')} name="password" type="password" value={editModel?.password} />
-              </Box>
-              <Box xs={12}>
-                <Input label={t('Name')} name="name" value={editModel?.name} />
-              </Box>
+              {Boolean(editType) && (
+                <>
+                  <Box xs={8}>
+                    <Input label={t('Server') + (editRequired.host ? ' *' : '')} name="host" value={editModel?.host} />
+                  </Box>
+                  <Box xs={4}>
+                    <Input label={t('Port') + (editRequired.port ? ' *' : '')} name="port" value={editModel?.port} />
+                  </Box>
+                  <Box xs={12}>
+                    <Input
+                      label={t('Username') + (editRequired.username ? ' *' : '')}
+                      name="username"
+                      value={editModel?.username}
+                    />
+                  </Box>
+                  <Box xs={12}>
+                    <Input
+                      notNull
+                      label={t('Password') + (editRequired.password ? ' *' : '')}
+                      name="password"
+                      type="password"
+                      value={editModel?.password}
+                    />
+                  </Box>
+                  <Box xs={12}>
+                    <Input
+                      label={t('Database') + (editRequired.database ? ' *' : '')}
+                      name="database"
+                      value={editModel?.database}
+                    />
+                  </Box>
+                  <Box xs={12}>
+                    <Input label={`${t('Name')}/${t('Alias')}`} name="name" value={editModel?.name} />
+                  </Box>
+                </>
+              )}
             </Grid>
           </Scrollable>
           <Box bg="background.secondary" p={4}>

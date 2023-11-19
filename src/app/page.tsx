@@ -8,11 +8,12 @@ import { Box, Button, Scrollable, Text } from '@react-bulk/web';
 import Icon from '@/components/Icon';
 import QueryEditor from '@/components/QueryEditor';
 import { t } from '@/helpers/translate.helper';
+import useHotkey from '@/hooks/useHotkey';
 import useTabs from '@/hooks/useTabs';
 
 export default function Page() {
   const theme = useTheme();
-  const { active, add, close, setActive, tabs } = useTabs();
+  const { active, add, close, goTo, goToNext, goToPrev, setActive, tabs } = useTabs();
 
   const scrollRef = useRef<HTMLDivElement>();
 
@@ -52,6 +53,39 @@ export default function Page() {
     document.querySelector(`#tab_${active}`)?.scrollIntoView({ behavior: 'smooth' });
   }, [tabs, active]);
 
+  const newTabHk = useHotkey({
+    callback: () => add(),
+    ctrl: true,
+    key: 't',
+  });
+
+  const closeTabHk = useHotkey({
+    callback: () => close(active),
+    ctrl: true,
+    key: 'w',
+  });
+
+  for (let i = 0; i < 10; i++) {
+    useHotkey({
+      callback: () => goTo(i),
+      ctrl: true,
+      key: `${i + 1}`,
+    });
+  }
+
+  useHotkey({
+    callback: () => goToNext(),
+    ctrl: true,
+    key: 'Tab',
+  });
+
+  useHotkey({
+    callback: () => goToPrev(),
+    ctrl: true,
+    key: 'Tab',
+    shift: true,
+  });
+
   return (
     <>
       <Box noWrap row border="1px solid primary">
@@ -84,7 +118,7 @@ export default function Page() {
                     color={textColor}
                     ml={2}
                     size="xsmall"
-                    title={t('Close')}
+                    title={`${t('Close')}${isActive ? ` ${closeTabHk.title}` : ''}`}
                     variant="text"
                     onPress={(e: MouseEvent) => handleCloseTab(e, tab.id)}
                   >
@@ -100,7 +134,7 @@ export default function Page() {
               flex
               corners={0}
               style={{ boxShadow: 'none !important' }}
-              title={t('New Tab')}
+              title={`${t('New Tab')} ${newTabHk.title}`}
               variant="outline"
               onPress={(e: MouseEvent) => handleAddTab(e)}
             >
