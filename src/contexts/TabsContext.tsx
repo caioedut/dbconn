@@ -40,10 +40,10 @@ function TabsProvider({ children }: any) {
       setActive(id);
 
       push({
-        ...tab,
-        id,
         connection: tab?.connection ?? connection,
         database: tab?.database ?? database,
+        ...tab,
+        id,
       });
 
       return id;

@@ -36,7 +36,7 @@ export default function Sidebar() {
           <Box key={index} style={link.style}>
             <Button
               component={NextLink}
-              color="primary.main.25"
+              color="primary"
               href={link.url}
               mb={1}
               p={0}

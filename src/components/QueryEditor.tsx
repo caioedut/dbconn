@@ -31,8 +31,6 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
   const connectionContext = useConnection();
   const { setConnection, setDatabase } = useTabs();
 
-  // const { connection, database } = tab;
-
   const connection = useMemo(
     () => tab?.connection ?? connectionContext.connection,
     [tab?.connection, connectionContext.connection],
@@ -67,8 +65,11 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
 
   useEffect(() => {
     setConnection(tab.id, connection);
+  }, [tab.id, connection, setConnection]);
+
+  useEffect(() => {
     setDatabase(tab.id, database);
-  }, [tab.id, connection, database, setConnection, setDatabase]);
+  }, [tab.id, database, setDatabase]);
 
   useEffect(() => {
     if (editorRef) {

@@ -11,8 +11,6 @@ import {
   Animation,
   Box,
   Button,
-  Card,
-  Divider,
   Drawer,
   Dropdown,
   Form,
@@ -28,7 +26,6 @@ import * as yup from 'yup';
 import Icon from '@/components/Icon';
 import List from '@/components/List';
 import Panel from '@/components/Panel';
-import QueryEditor from '@/components/QueryEditor';
 import State from '@/components/State';
 import { getError } from '@/helpers/api.helper';
 import { validate } from '@/helpers/form.helper';
@@ -385,13 +382,6 @@ export default function ConnectionsDrawer() {
                             overflow="hidden"
                             w={200}
                           />
-                          {/*<Card p={0} w={160}>*/}
-                          {/*  <Box p={2}>SELECT TOP 100</Box>*/}
-                          {/*  <Box>SELECT TOP 1000</Box>*/}
-                          {/*  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Commodi est nam quas quis*/}
-                          {/*  voluptatem. Ad aperiam consequuntur, eaque est, excepturi laborum nemo non odio praesentium*/}
-                          {/*  provident quidem reprehenderit sapiente voluptate.*/}
-                          {/*</Card>*/}
                         </Dropdown>
                       </Box>
                     </Box>

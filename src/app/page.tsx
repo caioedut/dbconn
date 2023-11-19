@@ -59,6 +59,9 @@ export default function Page() {
           {tabs.map((tab) => {
             const isActive = active === tab.id;
             const textColor = theme.contrast(isActive ? 'primary' : 'background');
+            const title = `${(tab?.connection?.name || tab?.connection?.host) ?? '-----'} /// ${
+              tab?.database?.name ?? '-----'
+            } /// ${tab?.connection?.username ?? '-----'}`;
 
             return (
               <Box
@@ -67,29 +70,15 @@ export default function Page() {
                 bg={isActive ? 'primary' : 'background'}
                 border="1px solid background.secondary"
                 borderRight="none"
-                p={1}
+                px={2}
+                title={title}
                 onPress={(e: MouseEvent) => handlePressTab(e, tab.id)}
                 onPressIn={(e: MouseEvent) => handlePressInTab(e, tab.id)}
               >
-                <Box center noWrap row>
-                  <Box flex noWrap row>
-                    <Box>
-                      <Text color={textColor} numberOfLines={1} variant="caption">
-                        Connection
-                      </Text>
-                      <Text color={textColor} numberOfLines={1} variant="secondary">
-                        {(tab?.connection?.name || tab?.connection?.host) ?? 'NO CONNECTION'}
-                      </Text>
-                    </Box>
-                    <Box ml={2}>
-                      <Text color={textColor} numberOfLines={1} variant="caption">
-                        Database
-                      </Text>
-                      <Text color={textColor} numberOfLines={1} variant="secondary">
-                        {tab?.database?.name ?? 'NO DATABASE'}
-                      </Text>
-                    </Box>
-                  </Box>
+                <Box center flex noWrap row maxw={200}>
+                  <Text flex color={textColor} numberOfLines={1} variant="secondary">
+                    {title}
+                  </Text>
                   <Button
                     circular
                     color={textColor}

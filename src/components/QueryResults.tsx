@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 
 import { useTheme } from '@react-bulk/core';
 import { Box, Divider, Scrollable, Text } from '@react-bulk/web';
@@ -9,6 +9,18 @@ import { Result } from '../../types/database.type';
 
 export type QueryResultsProps = {
   data?: Result[];
+};
+
+const getDisplayValue = (value: Date | null | number | string | undefined) => {
+  if (value === null || typeof value === 'undefined') {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString().replace(/[TZ]/g, ' ').trim();
+  }
+
+  return `${value?.toString() ?? value ?? ''}`;
 };
 
 function QueryResults({ data }: QueryResultsProps) {
@@ -27,8 +39,8 @@ function QueryResults({ data }: QueryResultsProps) {
   };
 
   const cellStyle = {
-    border: `1px solid ${theme.color('text.disabled')}`,
-    padding: theme.spacing(1),
+    border: '1px solid text.disabled',
+    p: 1,
   };
 
   const counterStyle = {
@@ -37,6 +49,36 @@ function QueryResults({ data }: QueryResultsProps) {
     r: 0,
     t: 0,
   };
+
+  const rowStyle = {
+    '&:hover td': {
+      bg: 'background.secondary',
+    },
+  };
+
+  const handleCopyCell = useCallback(
+    async (e: Event) => {
+      const selection = window.getSelection()?.toString();
+
+      if (!selection && resultsSelected) {
+        e.preventDefault();
+
+        const [resultIndex, rowIndex, field] = resultsSelected.split('_');
+        const text = data?.[resultIndex]?.rows?.[rowIndex]?.[field] ?? '';
+
+        await navigator.clipboard.writeText(text);
+      }
+    },
+    [data, resultsSelected],
+  );
+
+  useEffect(() => {
+    addEventListener('copy', handleCopyCell);
+
+    return () => {
+      removeEventListener('copy', handleCopyCell);
+    };
+  }, [handleCopyCell]);
 
   return (
     <>
@@ -64,14 +106,15 @@ function QueryResults({ data }: QueryResultsProps) {
               </Box>
               <tbody>
                 {rows.map((row, rowIndex) => (
-                  <tr key={rowIndex}>
+                  <Box key={rowIndex} component="tr" noRootStyles style={rowStyle}>
                     <Box component="th" noRootStyles l="-1px" position="sticky" style={[thStyle, cellStyle]}>
                       {rowIndex + 1}
                       <Divider vertical opacity={1} style={counterStyle} />
                     </Box>
                     {fields.map((field, fieldIndex) => {
-                      const selectionKey = `${index}_${rowIndex}_${fieldIndex}`;
+                      const selectionKey = `${index}_${rowIndex}_${field}`;
                       const isSelected = selectionKey === resultsSelected;
+                      const displayValue = getDisplayValue(row?.[field]);
 
                       return (
                         <Box
@@ -83,18 +126,16 @@ function QueryResults({ data }: QueryResultsProps) {
                           onPress={() => setResultsSelected(selectionKey)}
                         >
                           <Text numberOfLines={1} variant="secondary">
-                            {row?.[field] instanceof Date
-                              ? row?.[field].toISOString()
-                              : row?.[field] ?? (
-                                  <Text italic color="text.disabled">
-                                    NULL
-                                  </Text>
-                                )}
+                            {displayValue ?? (
+                              <Text italic color="text.disabled">
+                                NULL
+                              </Text>
+                            )}
                           </Text>
                         </Box>
                       );
                     })}
-                  </tr>
+                  </Box>
                 ))}
               </tbody>
             </Box>
