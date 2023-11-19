@@ -22,7 +22,7 @@ import api from '@/services/api';
 
 import { Connection, Database } from '../../../types/database.type';
 
-export default function DrawerConnections() {
+export default function ConnectionsDrawer() {
   const toaster = useToaster();
 
   const { connection, database, setConnection, setDatabase } = useConnection();

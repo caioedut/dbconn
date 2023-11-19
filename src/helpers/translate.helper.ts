@@ -5,6 +5,7 @@ const tokens = {
   'pt-BR': {
     Add: 'Adicionar',
     Cancel: 'Cancelar',
+    Close: 'Fechar',
     Connect: 'Conectar',
     Connections: 'Conexões',
     Database: 'Banco de Dados',
@@ -15,6 +16,7 @@ const tokens = {
     Hide: 'Esconder',
     More: 'Mais',
     Name: 'Nome',
+    'New Tab': 'Nova Aba',
     Password: 'Senha',
     Port: 'Porta',
     Query: 'Consulta',

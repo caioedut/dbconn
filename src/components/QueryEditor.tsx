@@ -5,11 +5,12 @@ import {
   PanelResizeHandle as ResizablePanelHandle,
 } from 'react-resizable-panels';
 
-import { useTheme, useToaster } from '@react-bulk/core';
-import { Box, Scrollable, Text } from '@react-bulk/web';
-import { Roboto_Mono } from 'next/font/google';
+import { useToaster } from '@react-bulk/core';
+import { Box, Scrollable } from '@react-bulk/web';
 
 import Panel from '@/components/Panel';
+import QueryResults from '@/components/QueryResults';
+import { RobotoMonoFont } from '@/fonts';
 import { getError } from '@/helpers/api.helper';
 import { t } from '@/helpers/translate.helper';
 import useConnection from '@/hooks/useConnection';
@@ -17,26 +18,25 @@ import api from '@/services/api';
 
 import { Result } from '../../types/database.type';
 
-const font = Roboto_Mono({
-  subsets: ['latin'],
-  weight: ['100', '200', '300', '400', '500', '600', '700'],
-});
+export type QueryEditorProps = {
+  sql?: string;
+};
 
-export default function QueryEditor() {
-  const theme = useTheme();
+export default function QueryEditor({ sql }: QueryEditorProps) {
   const toaster = useToaster();
   const { connection, database } = useConnection();
 
   const editorRef = useRef();
 
+  const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<Result[]>();
-  const [resultsSelected, setResultsSelected] = useState<any>();
 
   const sendQuery = async (e: any) => {
+    setIsLoading(true);
+    setResults(undefined);
+
     const selection = window.getSelection();
     const text = selection?.toString() || e.target?.innerText || '';
-
-    setResults(undefined);
 
     try {
       const response = await api.post('/query', connection?.id, text);
@@ -44,6 +44,8 @@ export default function QueryEditor() {
     } catch (err) {
       toaster.error(getError(err));
     }
+
+    setIsLoading(false);
   };
 
   const handleKeyDown = (e: any) => {
@@ -52,23 +54,13 @@ export default function QueryEditor() {
     }
   };
 
-  const thStyle = {
-    fontSize: 12,
-    fontWeight: 'bold',
-    textAlign: 'left',
-  };
-
-  const cellStyle = {
-    border: `1px solid ${theme.color('text.disabled')}`,
-    padding: theme.spacing(1),
-  };
-
   return (
     <>
       <ResizablePanelGroup autoSaveId="example" direction="vertical">
         <ResizablePanel collapsible>
           <Panel
             h="100%"
+            loading={isLoading}
             title={`${t('Query')}${connection ? `: ${connection?.name || connection?.host}` : ''}${
               database ? ` / ${database?.name}` : ''
             }`}
@@ -81,7 +73,7 @@ export default function QueryEditor() {
                 suppressContentEditableWarning
                 autoCapitalize="none"
                 autoCorrect="off"
-                className={font.className}
+                className={RobotoMonoFont.className}
                 h="100%"
                 p={2}
                 spellCheck={false}
@@ -92,7 +84,7 @@ export default function QueryEditor() {
                 }}
                 onKeyDown={handleKeyDown}
               >
-                SELECT * FROM user
+                {sql ?? ''}
               </Box>
             </Scrollable>
           </Panel>
@@ -100,62 +92,13 @@ export default function QueryEditor() {
 
         <ResizablePanelHandle style={{ height: 4 }} />
 
-        <ResizablePanel collapsible>
-          <Panel h="100%" title={t('Results')}>
-            {results?.map(({ fields, rows }, index) => (
-              <Scrollable key={index} mb={2} style={{ overflow: 'auto' }}>
-                <Box component="table" noRootStyles minw="100%" style={{ borderCollapse: 'collapse' }}>
-                  <Box component="thead" noRootStyles bg="background" position="sticky" t={0}>
-                    <tr>
-                      <Box component="th" noRootStyles style={[thStyle, cellStyle]}>
-                        #
-                      </Box>
-                      {fields.map((field, fieldIndex) => (
-                        <Box key={fieldIndex} component="th" noRootStyles style={[thStyle, cellStyle]}>
-                          {field}
-                        </Box>
-                      ))}
-                    </tr>
-                  </Box>
-                  <tbody>
-                    {rows.map((row, rowIndex) => (
-                      <tr key={rowIndex}>
-                        <Box component="th" noRootStyles style={[thStyle, cellStyle]}>
-                          {rowIndex + 1}
-                        </Box>
-                        {fields.map((field, fieldIndex) => {
-                          const selectionKey = `${index}_${rowIndex}_${fieldIndex}`;
-                          const isSelected = selectionKey === resultsSelected;
-
-                          return (
-                            <Box
-                              key={fieldIndex}
-                              component="td"
-                              noRootStyles
-                              bg={isSelected ? 'primary.main.35' : undefined}
-                              style={cellStyle}
-                              onPress={() => setResultsSelected(selectionKey)}
-                            >
-                              <Text numberOfLines={1} variant="secondary">
-                                {row?.[field] instanceof Date
-                                  ? row?.[field].toISOString()
-                                  : row?.[field] ?? (
-                                      <Text italic color="text.disabled">
-                                        NULL
-                                      </Text>
-                                    )}
-                              </Text>
-                            </Box>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </Box>
-              </Scrollable>
-            ))}
-          </Panel>
-        </ResizablePanel>
+        {Boolean(results) && (
+          <ResizablePanel collapsible>
+            <Panel h="100%" title={t('Results')}>
+              <QueryResults data={results} />
+            </Panel>
+          </ResizablePanel>
+        )}
       </ResizablePanelGroup>
     </>
   );
