@@ -23,6 +23,7 @@ const tokens = {
     Results: 'Resultados',
     Save: 'Salvar',
     Server: 'Servidor',
+    Settings: 'Ajustes',
     Show: 'Mostrar',
     'Something went wrong': 'Houve um erro inesperado',
     Structs: 'Estruturas',

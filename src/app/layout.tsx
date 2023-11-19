@@ -1,7 +1,7 @@
 'use client';
 
 import ReactBulk, { Box, Scrollable } from '@react-bulk/web';
-import { Poppins } from 'next/font/google';
+import { Roboto } from 'next/font/google';
 
 import Drawer from '@/components/Drawer';
 import Sidebar from '@/components/Sidebar';
@@ -11,9 +11,9 @@ import dark from '../../main/themes/dark';
 
 import './globals.css';
 
-const font = Poppins({
+const font = Roboto({
   subsets: ['latin'],
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  weight: ['100', '300', '400', '500', '700', '900'],
 });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

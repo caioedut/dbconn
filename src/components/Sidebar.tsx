@@ -10,7 +10,7 @@ export default function Sidebar() {
 
   const links = [
     {
-      name: t('Database'),
+      name: 'Database',
       icon: 'Database',
       url: '/',
     },
@@ -18,6 +18,12 @@ export default function Sidebar() {
       name: 'Queries',
       icon: 'Code',
       url: '/first',
+    },
+    {
+      name: 'Settings',
+      icon: 'Settings',
+      style: { mt: 'auto' },
+      url: '/settings',
     },
   ];
 
@@ -27,7 +33,7 @@ export default function Sidebar() {
         const isSelected = `/${segment ?? ''}` === link.url;
 
         return (
-          <Box key={index}>
+          <Box key={index} style={link.style}>
             <Button
               component={NextLink}
               color="primary.main.25"
@@ -35,7 +41,7 @@ export default function Sidebar() {
               mb={1}
               p={0}
               size="large"
-              title={link.name}
+              title={t(link.name)}
               variant={isSelected ? 'solid' : 'text'}
             >
               <Icon color="text" name={link.icon} size="1.5rem" />
