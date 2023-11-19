@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { useTheme } from '@react-bulk/core';
-import { Box, Button, Text } from '@react-bulk/web';
+import { Box, Button, Scrollable, Text } from '@react-bulk/web';
 
 import Icon from '@/components/Icon';
+import QueryEditor from '@/components/QueryEditor';
 import { t } from '@/helpers/translate.helper';
 import useTabs from '@/hooks/useTabs';
 
@@ -13,28 +14,48 @@ export default function Page() {
   const theme = useTheme();
   const { active, add, close, setActive, tabs } = useTabs();
 
-  const handleAddTab = (e: Event) => {
+  const scrollRef = useRef<HTMLDivElement>();
+
+  const handleScrollTabs = (e: MouseEvent) => {
+    // @ts-expect-error
+    scrollRef.current?.scrollBy(e.deltaY, 0);
+  };
+
+  const handleAddTab = (e: MouseEvent) => {
     e.stopPropagation();
 
     add();
   };
 
-  const handlePressTab = (e: Event, tabId: string) => {
+  const handlePressTab = (e: MouseEvent, tabId: string) => {
     e.stopPropagation();
 
     setActive(tabId);
   };
 
-  const handleCloseTab = (e: Event, tabId: string) => {
+  const handlePressInTab = (e: MouseEvent, tabId: string) => {
+    // Middle Button
+    if (e.button === 1) {
+      e.stopPropagation();
+      e.preventDefault();
+      close(tabId);
+    }
+  };
+
+  const handleCloseTab = (e: MouseEvent, tabId: string) => {
     e.stopPropagation();
 
     close(tabId);
   };
 
+  useEffect(() => {
+    document.querySelector(`#tab_${active}`)?.scrollIntoView({ behavior: 'smooth' });
+  }, [tabs, active]);
+
   return (
     <>
-      <Box>
-        <Box noWrap row>
+      <Box noWrap row border="1px solid primary">
+        <Scrollable ref={scrollRef} direction="horizontal" onWheel={handleScrollTabs}>
           {tabs.map((tab) => {
             const isActive = active === tab.id;
             const textColor = theme.contrast(isActive ? 'primary' : 'background');
@@ -42,19 +63,33 @@ export default function Page() {
             return (
               <Box
                 key={tab.id}
+                id={`tab_${tab.id}`}
                 bg={isActive ? 'primary' : 'background'}
                 border="1px solid background.secondary"
                 borderRight="none"
-                p={2}
-                onPress={(e: Event) => handlePressTab(e, tab.id)}
+                p={1}
+                onPress={(e: MouseEvent) => handlePressTab(e, tab.id)}
+                onPressIn={(e: MouseEvent) => handlePressInTab(e, tab.id)}
               >
                 <Box center noWrap row>
-                  <Box mr={2}>
-                    <Icon color={textColor} name="Code" />
+                  <Box flex noWrap row>
+                    <Box>
+                      <Text color={textColor} numberOfLines={1} variant="caption">
+                        Connection
+                      </Text>
+                      <Text color={textColor} numberOfLines={1} variant="secondary">
+                        {(tab?.connection?.name || tab?.connection?.host) ?? 'NO CONNECTION'}
+                      </Text>
+                    </Box>
+                    <Box ml={2}>
+                      <Text color={textColor} numberOfLines={1} variant="caption">
+                        Database
+                      </Text>
+                      <Text color={textColor} numberOfLines={1} variant="secondary">
+                        {tab?.database?.name ?? 'NO DATABASE'}
+                      </Text>
+                    </Box>
                   </Box>
-                  <Text flex color={textColor} numberOfLines={1}>
-                    {tab.title}
-                  </Text>
                   <Button
                     circular
                     color={textColor}
@@ -62,7 +97,7 @@ export default function Page() {
                     size="xsmall"
                     title={t('Close')}
                     variant="text"
-                    onPress={(e: Event) => handleCloseTab(e, tab.id)}
+                    onPress={(e: MouseEvent) => handleCloseTab(e, tab.id)}
                   >
                     <Icon color={textColor} name="X" />
                   </Button>
@@ -71,20 +106,19 @@ export default function Page() {
             );
           })}
 
-          <Button
-            // bg={isActive ? 'primary' : 'background'}
-            // border="1px solid primary"
-            corners={0}
-            // p={2}
-            m="1px"
-            style={{ boxShadow: 'none !important' }}
-            title={t('New Tab')}
-            variant="outline"
-            onPress={(e: Event) => handleAddTab(e)}
-          >
-            <Icon name="Plus" />
-          </Button>
-        </Box>
+          <Box bg="background.secondary" p="1px" position="sticky" right={0}>
+            <Button
+              flex
+              corners={0}
+              style={{ boxShadow: 'none !important' }}
+              title={t('New Tab')}
+              variant="outline"
+              onPress={(e: MouseEvent) => handleAddTab(e)}
+            >
+              <Icon name="Plus" />
+            </Button>
+          </Box>
+        </Scrollable>
       </Box>
 
       {tabs.map((tab) => {
@@ -92,11 +126,10 @@ export default function Page() {
 
         return (
           <Box key={tab.id} flex hidden={!isActive}>
-            {tab.render()}
+            <QueryEditor tab={tab} {...tab.props} />
           </Box>
         );
       })}
-      {/*<QueryEditor />*/}
     </>
   );
 }

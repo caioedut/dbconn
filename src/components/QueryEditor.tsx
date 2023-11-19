@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Panel as ResizablePanel,
   PanelGroup as ResizablePanelGroup,
@@ -10,10 +10,12 @@ import { Box, Scrollable } from '@react-bulk/web';
 
 import Panel from '@/components/Panel';
 import QueryResults from '@/components/QueryResults';
+import { Tab } from '@/contexts/TabsContext';
 import { RobotoMonoFont } from '@/fonts';
 import { getError } from '@/helpers/api.helper';
 import { t } from '@/helpers/translate.helper';
 import useConnection from '@/hooks/useConnection';
+import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
 
 import { Result } from '../../types/database.type';
@@ -21,11 +23,25 @@ import { Result } from '../../types/database.type';
 export type QueryEditorProps = {
   autoRun?: boolean;
   sql?: string;
+  tab: Tab;
 };
 
-export default function QueryEditor({ autoRun, sql }: QueryEditorProps) {
+function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
   const toaster = useToaster();
-  const { connection, database } = useConnection();
+  const connectionContext = useConnection();
+  const { setConnection, setDatabase } = useTabs();
+
+  // const { connection, database } = tab;
+
+  const connection = useMemo(
+    () => tab?.connection ?? connectionContext.connection,
+    [tab?.connection, connectionContext.connection],
+  );
+
+  const database = useMemo(
+    () => tab?.database ?? connectionContext.database,
+    [tab?.database, connectionContext.database],
+  );
 
   const editorRef = useRef<HTMLDivElement>();
 
@@ -50,6 +66,11 @@ export default function QueryEditor({ autoRun, sql }: QueryEditorProps) {
   };
 
   useEffect(() => {
+    setConnection(tab.id, connection);
+    setDatabase(tab.id, database);
+  }, [tab.id, connection, database, setConnection, setDatabase]);
+
+  useEffect(() => {
     if (editorRef) {
       editorRef.current?.focus();
 
@@ -60,7 +81,7 @@ export default function QueryEditor({ autoRun, sql }: QueryEditorProps) {
   }, [editorRef]);
 
   const handleKeyDown = (e: any) => {
-    if (e.key === 'Enter' && e.ctrlKey) {
+    if (e.key === 'F5' || (e.key === 'Enter' && e.ctrlKey)) {
       sendQuery();
     }
   };
@@ -72,9 +93,7 @@ export default function QueryEditor({ autoRun, sql }: QueryEditorProps) {
           <Panel
             h="100%"
             loading={isLoading}
-            title={`${t('Query')}${connection ? `: ${connection?.name || connection?.host}` : ''}${
-              database ? ` / ${database?.name}` : ''
-            }`}
+            // title={t('Query')}
           >
             <Scrollable>
               <Box
@@ -101,16 +120,20 @@ export default function QueryEditor({ autoRun, sql }: QueryEditorProps) {
           </Panel>
         </ResizablePanel>
 
-        <ResizablePanelHandle style={{ height: 4 }} />
-
         {Boolean(results) && (
-          <ResizablePanel collapsible>
-            <Panel h="100%" title={t('Results')}>
-              <QueryResults data={results} />
-            </Panel>
-          </ResizablePanel>
+          <>
+            <ResizablePanelHandle style={{ height: 4 }} />
+
+            <ResizablePanel collapsible>
+              <Panel h="100%" title={t('Results')}>
+                <QueryResults data={results} />
+              </Panel>
+            </ResizablePanel>
+          </>
         )}
       </ResizablePanelGroup>
     </>
   );
 }
+
+export default memo(QueryEditor);

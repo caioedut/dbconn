@@ -12,7 +12,7 @@ export type IconProps = BoxProps & {
 export default function Icon({ name, color, size, ...rest }: IconProps) {
   const theme = useTheme();
 
-  color = theme.color(color ?? 'primary');
+  color = color === 'contrast' ? theme.contrast('primary') : theme.color(color ?? 'primary');
   size = (typeof size === 'string' ? theme.rem(Number(size.replace(/[^\d.]/g, ''))) : size) ?? theme.rem();
 
   // @ts-expect-error

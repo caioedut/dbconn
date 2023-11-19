@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 
 import { useTheme } from '@react-bulk/core';
 import { Box, Divider, Scrollable, Text } from '@react-bulk/web';
@@ -11,14 +11,14 @@ export type QueryResultsProps = {
   data?: Result[];
 };
 
-export default function QueryResults({ data }: QueryResultsProps) {
+function QueryResults({ data }: QueryResultsProps) {
   const theme = useTheme();
 
   const [resultsSelected, setResultsSelected] = useState<any>();
 
   const thStyle = {
     '&:first-child': { zIndex: 1 },
-    bg: 'background',
+    bg: 'background.secondary',
     fontSize: 12,
     fontWeight: 'bold',
     letterSpacing: 0.5,
@@ -50,10 +50,9 @@ export default function QueryResults({ data }: QueryResultsProps) {
               minw="100%"
               style={{ borderCollapse: 'collapse' }}
             >
-              <Box component="thead" noRootStyles bg="background" position="sticky" t={0}>
+              <Box component="thead" noRootStyles position="sticky" t="-1px">
                 <tr>
                   <Box component="th" noRootStyles l="-1px" position="sticky" pr={2} style={[thStyle, cellStyle]}>
-                    #
                     <Divider vertical opacity={1} style={counterStyle} />
                   </Box>
                   {fields.map((field, fieldIndex) => (
@@ -105,3 +104,5 @@ export default function QueryResults({ data }: QueryResultsProps) {
     </>
   );
 }
+
+export default memo(QueryResults);

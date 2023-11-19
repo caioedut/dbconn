@@ -23,10 +23,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Box bg="background.primary">
                   <Sidebar />
                 </Box>
-                <Box w={320}>
+                <Box m={1} w={320}>
                   <Drawer />
                 </Box>
-                <Box flex>{children}</Box>
+                <Box flex m={1} ml={0}>
+                  {children}
+                </Box>
               </Box>
             </TabsProvider>
           </ConnectionProvider>

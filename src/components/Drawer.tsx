@@ -7,7 +7,7 @@ export default function Drawer() {
   const segment = useSelectedLayoutSegment() ?? 'connections';
 
   return (
-    <Box flex h="100%" p={1}>
+    <Box flex h="100%">
       {segment === 'connections' && <ConnectionsDrawer />}
     </Box>
   );

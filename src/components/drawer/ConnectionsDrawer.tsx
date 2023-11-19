@@ -181,7 +181,10 @@ export default function ConnectionsDrawer() {
       const response = await api.get('/query/topQuery', connection?.id, tableName, limit);
 
       add({
-        render: () => <QueryEditor autoRun sql={response.data} />,
+        props: {
+          autoRun: true,
+          sql: response.data,
+        },
       });
     } catch (err) {
       toaster.error(getError(err));
@@ -197,7 +200,7 @@ export default function ConnectionsDrawer() {
             loading={isValidatingConnections || isValidatingDatabases}
             right={
               <Button circular size="xsmall" title={t('Add')} variant="text" onPress={() => setEditModel({})}>
-                <Icon name="PlusCircle" />
+                <Icon color="contrast" name="PlusCircle" />
               </Button>
             }
             title={t('Connections')}
@@ -314,7 +317,7 @@ export default function ConnectionsDrawer() {
             loading={isValidatingTables}
             right={
               <Button circular size="xsmall" title={t('Refresh')} variant="text" onPress={() => mutateTables()}>
-                <Icon name="RefreshCw" />
+                <Icon color="contrast" name="RefreshCw" />
               </Button>
             }
             title={t('Structs')}
