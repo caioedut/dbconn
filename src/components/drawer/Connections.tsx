@@ -32,7 +32,7 @@ export default function DrawerConnections() {
 
   const [isConnecting, updateIsConnecting] = useObjectState<{ [key: string]: boolean }>({});
 
-  const [showTableGroup, updateShowTableGroup] = useObjectState<{ [key: string]: boolean }>({ table: true });
+  const [showTableGroup, updateShowTableGroup] = useObjectState<{ [key: string]: boolean }>({});
 
   const {
     data: connections,
@@ -110,10 +110,11 @@ export default function DrawerConnections() {
       updateIsConnecting({ [conn.id]: true });
 
       try {
-        const res = await api.post('/connections/connect', conn.id);
-        console.log(res);
+        await api.post('/connections/connect', conn.id);
         await mutateConnections();
-      } catch (err) {}
+      } catch (err) {
+        toaster.error(getError(err));
+      }
 
       updateIsConnecting({ [conn.id]: false });
     }
@@ -129,7 +130,9 @@ export default function DrawerConnections() {
       try {
         await api.post('/connections/disconnect', conn.id);
         await mutateConnections();
-      } catch (err) {}
+      } catch (err) {
+        toaster.error(getError(err));
+      }
     }
 
     setConnection(undefined);
@@ -313,7 +316,7 @@ export default function DrawerConnections() {
                           <Box key={table.name} style={{ '&:hover': { bg: 'primary.main.25' } }}>
                             <Box center noWrap row p={1}>
                               <Box h={12} ml={1} w={12}>
-                                <Icon name=" Table" size={12} />
+                                <Icon name="Table" size={12} />
                               </Box>
                               <Text flex ml={2} numberOfLines={1}>
                                 {table.name}

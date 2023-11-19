@@ -6,7 +6,7 @@ export default async function connect(options: Connect) {
   return mysql.createConnection({
     host: options?.host,
     password: options?.password,
-    port: options?.port,
+    port: Number(options?.port || 3306),
     user: options?.username,
   });
 }

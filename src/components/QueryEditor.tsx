@@ -5,8 +5,8 @@ import {
   PanelResizeHandle as ResizablePanelHandle,
 } from 'react-resizable-panels';
 
-import { useToaster } from '@react-bulk/core';
-import { Box, Divider, Scrollable, Text } from '@react-bulk/web';
+import { useTheme, useToaster } from '@react-bulk/core';
+import { Box, Scrollable, Text } from '@react-bulk/web';
 import { Roboto_Mono } from 'next/font/google';
 
 import Panel from '@/components/Panel';
@@ -23,12 +23,14 @@ const font = Roboto_Mono({
 });
 
 export default function QueryEditor() {
+  const theme = useTheme();
   const toaster = useToaster();
   const { connection, database } = useConnection();
 
   const editorRef = useRef();
 
   const [results, setResults] = useState<Result[]>();
+  const [resultsSelected, setResultsSelected] = useState<any>();
 
   const sendQuery = async (e: any) => {
     const selection = window.getSelection();
@@ -50,6 +52,17 @@ export default function QueryEditor() {
     }
   };
 
+  const thStyle = {
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'left',
+  };
+
+  const cellStyle = {
+    border: `1px solid ${theme.color('text.disabled')}`,
+    padding: theme.spacing(1),
+  };
+
   return (
     <>
       <ResizablePanelGroup autoSaveId="example" direction="vertical">
@@ -64,6 +77,7 @@ export default function QueryEditor() {
               ref={editorRef}
               contentEditable
               noRootStyles
+              suppressContentEditableWarning
               autoCapitalize="none"
               autoCorrect="off"
               className={font.className}
@@ -89,34 +103,56 @@ export default function QueryEditor() {
           <Panel h="100%" title={t('Results')}>
             <Box m={-2}>
               {results?.map(({ fields, rows }, index) => (
-                <>
-                  {index > 0 && <Divider my={1} />}
-
-                  <Scrollable direction="horizontal">
-                    <table>
-                      <thead>
-                        <tr>
-                          {fields.map((field, fieldIndex) => (
-                            <th key={fieldIndex}>{field}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rows.map((row, rowIndex) => (
-                          <tr key={rowIndex}>
-                            {fields.map((field, fieldIndex) => (
-                              <td key={fieldIndex}>
-                                <Text numberOfLines={1}>
-                                  {row?.[field] instanceof Date ? row?.[field].toISOString() : row?.[field] ?? 'null'}
-                                </Text>
-                              </td>
-                            ))}
-                          </tr>
+                <Scrollable key={index} direction="horizontal" mb={2}>
+                  <Box component="table" noRootStyles minw="100%" style={{ borderCollapse: 'collapse' }}>
+                    <Box component="thead" noRootStyles bg="background">
+                      <tr>
+                        <Box component="th" noRootStyles style={[thStyle, cellStyle]}>
+                          #
+                        </Box>
+                        {fields.map((field, fieldIndex) => (
+                          <Box key={fieldIndex} component="th" noRootStyles style={[thStyle, cellStyle]}>
+                            {field}
+                          </Box>
                         ))}
-                      </tbody>
-                    </table>
-                  </Scrollable>
-                </>
+                      </tr>
+                    </Box>
+                    <tbody>
+                      {rows.map((row, rowIndex) => (
+                        <tr key={rowIndex}>
+                          <Box component="th" noRootStyles style={[thStyle, cellStyle]}>
+                            {rowIndex + 1}
+                          </Box>
+                          {fields.map((field, fieldIndex) => {
+                            const selectionKey = `${index}_${rowIndex}_${fieldIndex}`;
+                            const isSelected = selectionKey === resultsSelected;
+
+                            return (
+                              <Box
+                                key={fieldIndex}
+                                component="td"
+                                noRootStyles
+                                bg={isSelected ? 'primary.main.35' : undefined}
+                                style={cellStyle}
+                                onPress={() => setResultsSelected(selectionKey)}
+                              >
+                                <Text numberOfLines={1} variant="secondary">
+                                  {row?.[field] instanceof Date
+                                    ? row?.[field].toISOString()
+                                    : row?.[field] ?? (
+                                        <Text italic color="text.disabled">
+                                          NULL
+                                        </Text>
+                                      )}
+                                </Text>
+                              </Box>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Box>
+                </Scrollable>
               ))}
             </Box>
           </Panel>

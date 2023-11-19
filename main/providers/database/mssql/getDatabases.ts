@@ -1,15 +1,9 @@
-import mssql, { Connection } from 'mssql';
+import { ConnectionPool } from 'mssql';
 
 import { ConnRef } from '../../../types/database.type';
 
-export default async function getDatabases(conn: ConnRef<Connection>) {
-  return new Promise((resolve, reject) => {
-    conn.current.connect(async (error) => {
-      if (error) {
-        return reject(error);
-      }
+export default async function getDatabases(conn: ConnRef<ConnectionPool>) {
+  const result = await conn.current.request().query('SELECT name FROM sys.databases');
 
-      return resolve(await mssql.query('SELECT name FROM sys.databases'));
-    });
-  });
+  return result.recordset;
 }

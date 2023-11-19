@@ -1,18 +1,11 @@
-import mssql, { Connection } from 'mssql';
+import { ConnectionPool } from 'mssql';
 
 import { ConnRef } from '../../../types/database.type';
 
-export default async function setDatabase(conn: ConnRef<Connection>, database: string) {
-  return new Promise((resolve, reject) => {
-    conn.current.connect(async (error) => {
-      if (error) {
-        return reject(error);
-      }
+export default async function setDatabase(conn: ConnRef<ConnectionPool>, database: string) {
+  await conn.current.request().query(`USE ${database}`);
 
-      await mssql.query(`USE ${database}`);
-      conn.database = database;
+  conn.database = database;
 
-      resolve(database);
-    });
-  });
+  return database;
 }

@@ -7,7 +7,7 @@ export default async function connect(options: Partial<Connect>) {
     database: options?.database,
     host: options?.host,
     password: options?.password,
-    port: options?.port,
+    port: Number(options?.port || 5432),
     user: options?.username,
   });
 

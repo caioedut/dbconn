@@ -1,6 +1,6 @@
 {
-  "name": "electron-app",
-  "productName": "Electron App",
+  "name": "dbconn",
+  "productName": "DbConn",
   "version": "0.1.0",
   "private": true,
   "main": "main/out/main.js",
@@ -66,8 +66,8 @@
     "typescript": "^5.2.2"
   },
   "build": {
-    "appId": "Electron-app",
-    "productName": "Electron App",
+    "appId": "dbconn",
+    "productName": "DbConn",
     "win": {
       "target": [
         "nsis"
@@ -77,7 +77,7 @@
       "oneClick": false,
       "perMachine": true,
       "allowToChangeInstallationDirectory": true,
-      "uninstallDisplayName": "Electron App",
+      "uninstallDisplayName": "DbConn",
       "license": "license.md"
     },
     "mac": {

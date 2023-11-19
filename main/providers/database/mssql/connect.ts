@@ -9,7 +9,7 @@ export default async function connect(options: Connect) {
       trustServerCertificate: false, // change to true for local dev / self-signed certs
     },
     password: options?.password,
-    port: options?.port,
+    port: Number(options?.port || 1433),
     server: options?.host,
     user: options?.username,
   });

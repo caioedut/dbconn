@@ -1,17 +1,14 @@
-import mssql, { Connection } from 'mssql';
+import { ConnectionPool } from 'mssql';
 
 import { ConnRef } from '../../../types/database.type';
 
-export default async function getTables(conn: ConnRef<Connection>) {
-  return new Promise((resolve, reject) => {
-    conn.current.connect(async (error) => {
-      if (error) {
-        return reject(error);
-      }
+export default async function getTables(conn: ConnRef<ConnectionPool>) {
+  const result = await conn.current
+    .request()
+    .query(`SELECT table_name, table_type FROM information_schema.tables WHERE table_catalog = '${conn.database}'`);
 
-      await mssql.query(`USE ${conn.database}`);
-
-      return resolve(await mssql.query('SELECT name FROM sys.databases'));
-    });
-  });
+  return result.recordset.map((row) => ({
+    name: row.table_name,
+    type: row.table_type?.replace(/^BASE /, '')?.toLowerCase() || null,
+  }));
 }
