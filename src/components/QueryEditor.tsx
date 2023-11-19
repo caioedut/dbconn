@@ -18,7 +18,7 @@ import useConnection from '@/hooks/useConnection';
 import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
 
-import { Result } from '../../types/database.type';
+import { QueryError, Result } from '../../types/database.type';
 
 export type QueryEditorProps = {
   autoRun?: boolean;
@@ -44,7 +44,7 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
   const editorRef = useRef<HTMLDivElement>();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<Result[]>();
+  const [results, setResults] = useState<(QueryError | Result)[]>();
 
   const sendQuery = async () => {
     setIsLoading(true);

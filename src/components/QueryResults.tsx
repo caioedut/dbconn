@@ -1,14 +1,14 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, memo, useCallback, useEffect, useState } from 'react';
 
-import { useTheme } from '@react-bulk/core';
 import { Box, Divider, Scrollable, Text } from '@react-bulk/web';
 
 import { RobotoMonoFont } from '@/fonts';
+import { t } from '@/helpers/translate.helper';
 
-import { Result } from '../../types/database.type';
+import { QueryError, Result } from '../../types/database.type';
 
 export type QueryResultsProps = {
-  data?: Result[];
+  data?: (QueryError | Result)[];
 };
 
 const getDisplayValue = (value: Date | null | number | string | undefined) => {
@@ -20,12 +20,14 @@ const getDisplayValue = (value: Date | null | number | string | undefined) => {
     return value.toISOString().replace(/[TZ]/g, ' ').trim();
   }
 
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+
   return `${value?.toString() ?? value ?? ''}`;
 };
 
 function QueryResults({ data }: QueryResultsProps) {
-  const theme = useTheme();
-
   const [resultsSelected, setResultsSelected] = useState<any>();
 
   const thStyle = {
@@ -64,9 +66,12 @@ function QueryResults({ data }: QueryResultsProps) {
         e.preventDefault();
 
         const [resultIndex, rowIndex, field] = resultsSelected.split('_');
-        const text = data?.[resultIndex]?.rows?.[rowIndex]?.[field] ?? '';
+        const result = data?.[resultIndex];
 
-        await navigator.clipboard.writeText(text);
+        if (result && !('error' in result)) {
+          const text = getDisplayValue(result.rows?.[rowIndex]?.[field]);
+          await navigator.clipboard.writeText(text ?? 'NULL');
+        }
       }
     },
     [data, resultsSelected],
@@ -82,7 +87,20 @@ function QueryResults({ data }: QueryResultsProps) {
 
   return (
     <>
-      {(data || []).map(({ fields, rows }, index) => {
+      {(data || []).map((result, index) => {
+        if ('error' in result) {
+          return (
+            <Box key={index} border="1px solid error" mb={0} mt={index ? 2 : 0}>
+              <Text bg="error" letterSpacing={1} p={1} variant="caption">
+                {t('Result')} #{index + 1} | ERROR {result.code} ({result.state})
+              </Text>
+              <Text p={1}>{result.message}</Text>
+            </Box>
+          );
+        }
+
+        const { fields, rows } = result;
+
         return (
           <Scrollable key={index} mt={index ? 2 : 0} style={{ overflow: 'auto' }}>
             <Box

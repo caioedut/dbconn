@@ -23,3 +23,11 @@ export type Result = {
   fields: string[];
   rows: any[];
 };
+
+export type QueryError = {
+  code: number;
+  error: true;
+  message: string;
+  state: string;
+  symbol: string;
+};

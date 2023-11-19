@@ -11,13 +11,23 @@ export default async function query(conn: ConnRef<Connection>, query: string) {
   const promises = [];
 
   for (const queryLine of queries) {
-    promises.push(conn.current.promise().query(queryLine));
+    promises.push(
+      conn.current
+        .promise()
+        .query(queryLine)
+        .then((res) => ({
+          fields: res?.[1]?.map((field) => field.name) || [],
+          rows: res?.[0] || [],
+        }))
+        .catch((err) => ({
+          code: err.errno,
+          error: true,
+          message: err.message,
+          state: err.sqlState,
+          symbol: err.code,
+        })),
+    );
   }
 
-  const result = await Promise.all(promises);
-
-  return result.map((item) => ({
-    fields: item?.[1]?.map((field) => field.name) || [],
-    rows: item?.[0] || [],
-  }));
+  return await Promise.all(promises);
 }
