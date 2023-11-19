@@ -1,0 +1,93 @@
+{
+  "name": "electron-app",
+  "productName": "Electron App",
+  "version": "0.1.0",
+  "private": true,
+  "main": "main/out/main.js",
+  "homepage": "./",
+  "description": "My Next.js project",
+  "author": "test",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development concurrently -k \"cross-env BROWSER=none npm run next:dev\" \"npm run electron:dev\"",
+    "build": " npm run build:main && next build",
+    "start": "cross-env npm run electron",
+    "build:main": "tsc -p main",
+    "next:dev": "next dev",
+    "next:start": "next start",
+    "next:lint": "next lint",
+    "electron:dev": "npm run build:main && wait-on tcp:3000 && electron .",
+    "electron": "electron .",
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder"
+  },
+  "dependencies": {
+    "@react-bulk/core": "^0.5.3",
+    "@react-bulk/web": "^0.5.3",
+    "@types/electron": "^1.6.10",
+    "@types/node": "^20.6.0",
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
+    "autoprefixer": "^10.4.15",
+    "concurrently": "^8.2.1",
+    "cross-env": "^7.0.3",
+    "electron-serve": "^1.1.0",
+    "electron-squirrel-startup": "^1.0.0",
+    "electron-store": "^8.1.0",
+    "mssql": "^10.0.1",
+    "mysql2": "^3.6.3",
+    "next": "13.4.3",
+    "pg": "^8.11.3",
+    "postcss": "^8.4.29",
+    "qs": "^6.11.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-feather": "^2.0.10",
+    "react-resizable-panels": "^0.0.57",
+    "react-state-hooks": "^0.1.4",
+    "swr": "^2.2.0",
+    "uuid": "^9.0.1",
+    "wait-on": "^7.0.1",
+    "yup": "^1.3.2"
+  },
+  "devDependencies": {
+    "@types/mssql": "^9.1.3",
+    "@types/pg": "^8.10.9",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.2.0",
+    "@typescript-eslint/parser": "^6.2.0",
+    "electron": "^26.2.0",
+    "electron-builder": "^24.6.4",
+    "eslint": "^8.46.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-perfectionist": "^1.5.1",
+    "eslint-plugin-react": "^7.33.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.0.2",
+    "typescript": "^5.2.2"
+  },
+  "build": {
+    "appId": "Electron-app",
+    "productName": "Electron App",
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "uninstallDisplayName": "Electron App",
+      "license": "license.md"
+    },
+    "mac": {
+      "category": "your.app.category.type",
+      "target": [
+        "dmg"
+      ]
+    },
+    "dmg": {
+      "title": "Mac Installer"
+    }
+  }
+}
