@@ -13,7 +13,6 @@ import QueryResults from '@/components/QueryResults';
 import { Tab } from '@/contexts/TabsContext';
 import { RobotoMonoFont } from '@/fonts';
 import { getError } from '@/helpers/api.helper';
-import { t } from '@/helpers/translate.helper';
 import useConnection from '@/hooks/useConnection';
 import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
@@ -126,9 +125,7 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
             <ResizablePanelHandle style={{ height: 4 }} />
 
             <ResizablePanel collapsible>
-              <Panel h="100%" title={t('Results')}>
-                <QueryResults data={results} />
-              </Panel>
+              <QueryResults data={results} />
             </ResizablePanel>
           </>
         )}

@@ -1,7 +1,8 @@
-import React, { Fragment, memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 
-import { Box, Divider, Scrollable, Text } from '@react-bulk/web';
+import { Box, Divider, Scrollable, Tabs, Text } from '@react-bulk/web';
 
+import Panel from '@/components/Panel';
 import { RobotoMonoFont } from '@/fonts';
 import { t } from '@/helpers/translate.helper';
 
@@ -28,6 +29,8 @@ const getDisplayValue = (value: Date | null | number | string | undefined) => {
 };
 
 function QueryResults({ data }: QueryResultsProps) {
+  const [tab, setTab] = useState(0);
+
   const [resultsSelected, setResultsSelected] = useState<any>();
 
   const thStyle = {
@@ -86,81 +89,87 @@ function QueryResults({ data }: QueryResultsProps) {
   }, [handleCopyCell]);
 
   return (
-    <>
-      {(data || []).map((result, index) => {
-        if ('error' in result) {
-          return (
-            <Box key={index} border="1px solid error" mb={0} mt={index ? 2 : 0}>
-              <Text bg="error" letterSpacing={1} p={1} variant="caption">
-                {t('Result')} #{index + 1} | ERROR {result.code} ({result.state})
+    <Box h="100%">
+      <Box h={36} mb={-1} p={1} pb={0}>
+        <Tabs
+          tabs={(data || []).map((_, index) => ({
+            label: `${t('Result')} #${index + 1}`,
+          }))}
+          value={tab}
+          onChange={(_, value) => setTab(value as number)}
+        />
+      </Box>
+
+      <Panel h="calc(100% - 36px)">
+        {(data || []).map((result, index) => {
+          return 'error' in result ? (
+            <Box key={index} border="1px solid error" hidden={index !== tab} m={2}>
+              <Text bg="error" letterSpacing={1} p={2} variant="caption">
+                ERROR {result.code} ({result.state})
               </Text>
-              <Text p={1}>{result.message}</Text>
+              <Text p={2}>{result.message}</Text>
             </Box>
-          );
-        }
-
-        const { fields, rows } = result;
-
-        return (
-          <Scrollable key={index} mt={index ? 2 : 0} style={{ overflow: 'auto' }}>
-            <Box
-              component="table"
-              noRootStyles
-              className={RobotoMonoFont.className}
-              minw="100%"
-              style={{ borderCollapse: 'collapse' }}
-            >
-              <Box component="thead" noRootStyles position="sticky" t="-1px">
-                <tr>
-                  <Box component="th" noRootStyles l="-1px" position="sticky" pr={2} style={[thStyle, cellStyle]}>
-                    <Divider vertical opacity={1} style={counterStyle} />
-                  </Box>
-                  {fields.map((field, fieldIndex) => (
-                    <Box key={fieldIndex} component="th" noRootStyles style={[thStyle, cellStyle]}>
-                      {field}
-                    </Box>
-                  ))}
-                </tr>
-              </Box>
-              <tbody>
-                {rows.map((row, rowIndex) => (
-                  <Box key={rowIndex} component="tr" noRootStyles style={rowStyle}>
-                    <Box component="th" noRootStyles l="-1px" position="sticky" style={[thStyle, cellStyle]}>
-                      {rowIndex + 1}
+          ) : (
+            <Scrollable key={index} hidden={index !== tab} style={{ overflow: 'auto' }}>
+              <Box
+                component="table"
+                noRootStyles
+                className={RobotoMonoFont.className}
+                minw="100%"
+                style={{ borderCollapse: 'collapse' }}
+              >
+                <Box component="thead" noRootStyles position="sticky" t="-1px">
+                  <tr>
+                    <Box component="th" noRootStyles l="-1px" position="sticky" pr={2} style={[thStyle, cellStyle]}>
                       <Divider vertical opacity={1} style={counterStyle} />
                     </Box>
-                    {fields.map((field, fieldIndex) => {
-                      const selectionKey = `${index}_${rowIndex}_${field}`;
-                      const isSelected = selectionKey === resultsSelected;
-                      const displayValue = getDisplayValue(row?.[field]);
+                    {result.fields.map((field, fieldIndex) => (
+                      <Box key={fieldIndex} component="th" noRootStyles style={[thStyle, cellStyle]}>
+                        {field}
+                      </Box>
+                    ))}
+                  </tr>
+                </Box>
+                <tbody>
+                  {result.rows.map((row, rowIndex) => (
+                    <Box key={rowIndex} component="tr" noRootStyles style={rowStyle}>
+                      <Box component="th" noRootStyles l="-1px" position="sticky" style={[thStyle, cellStyle]}>
+                        {rowIndex + 1}
+                        <Divider vertical opacity={1} style={counterStyle} />
+                      </Box>
+                      {result.fields.map((field, fieldIndex) => {
+                        const selectionKey = `${index}_${rowIndex}_${field}`;
+                        const isSelected = selectionKey === resultsSelected;
+                        const displayValue = getDisplayValue(row?.[field]);
 
-                      return (
-                        <Box
-                          key={fieldIndex}
-                          component="td"
-                          noRootStyles
-                          bg={isSelected ? 'primary.main.35' : undefined}
-                          style={cellStyle}
-                          onPress={() => setResultsSelected(selectionKey)}
-                        >
-                          <Text numberOfLines={1} variant="secondary">
-                            {displayValue ?? (
-                              <Text italic color="text.disabled">
-                                NULL
-                              </Text>
-                            )}
-                          </Text>
-                        </Box>
-                      );
-                    })}
-                  </Box>
-                ))}
-              </tbody>
-            </Box>
-          </Scrollable>
-        );
-      })}
-    </>
+                        return (
+                          <Box
+                            key={fieldIndex}
+                            component="td"
+                            noRootStyles
+                            bg={isSelected ? 'primary.main.35' : undefined}
+                            style={cellStyle}
+                            onPress={() => setResultsSelected(selectionKey)}
+                          >
+                            <Text numberOfLines={1} variant="secondary">
+                              {displayValue ?? (
+                                <Text italic color="text.disabled">
+                                  NULL
+                                </Text>
+                              )}
+                            </Text>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  ))}
+                </tbody>
+              </Box>
+            </Scrollable>
+          );
+        })}
+      </Panel>
+    </Box>
   );
 }
 
