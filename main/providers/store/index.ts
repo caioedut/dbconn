@@ -14,7 +14,7 @@ const store = {
           name: 'Local MySQL',
           host: '127.0.0.1',
           password: '',
-          port: '3306',
+          port: 3306,
           type: 'mysql',
           user: 'root',
         },
@@ -28,10 +28,10 @@ const store = {
       internal.set(
         'connections',
         (value || []).map((item) => {
-          delete item.connected;
-          // @ts-expect-error
-          delete item.current;
-          return item;
+          const clone: Partial<ConnRef> = structuredClone(item);
+          delete clone.connected;
+          delete clone.current;
+          return clone;
         }),
       );
     },

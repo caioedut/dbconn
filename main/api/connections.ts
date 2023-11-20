@@ -8,11 +8,7 @@ import store from '../providers/store';
 import { ConnRef } from '../types/database.type';
 
 export async function GET_index() {
-  return store.connections.get().map((item) => {
-    // @ts-expect-error
-    delete item.password;
-    return item;
-  });
+  return store.connections.get();
 }
 
 export async function POST_index(data: ConnRef) {
