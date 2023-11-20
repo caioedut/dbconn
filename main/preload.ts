@@ -9,7 +9,13 @@ function create(method: 'DELETE' | 'GET' | 'POST' | 'PUT') {
     return new Promise((resolve, reject) => {
       setTimeout(async () => {
         try {
-          resolve(await ipcRenderer.invoke('api', `${method}/${route}`, ...args));
+          const res = await ipcRenderer.invoke('api', `${method}/${route}`, ...args);
+
+          if (!res?.ok) {
+            throw res;
+          }
+
+          resolve(res);
         } catch (err) {
           reject(err);
         }
