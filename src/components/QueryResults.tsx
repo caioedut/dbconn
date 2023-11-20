@@ -92,8 +92,17 @@ function QueryResults({ data }: QueryResultsProps) {
     <Box h="100%">
       <Box h={36} mb={-1} p={1} pb={0}>
         <Tabs
-          tabs={(data || []).map((_, index) => ({
-            label: `${t('Result')} #${index + 1}`,
+          tabs={(data || []).map((result, index) => ({
+            label: (
+              <>
+                <Text bold letterSpacing={1} variant="caption">
+                  {t('RESULT')} #{index + 1}
+                </Text>
+                <Text right variant="caption">
+                  {'error' in result ? t('ERROR') : `${result.rows.length} ${t('rows')}`}
+                </Text>
+              </>
+            ) as any,
           }))}
           value={tab}
           onChange={(_, value) => setTab(value as number)}

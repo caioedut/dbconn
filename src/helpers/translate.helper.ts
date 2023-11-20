@@ -26,6 +26,7 @@ const tokens = {
     Remove: 'Remover',
     Result: 'Resultado',
     Results: 'Resultados',
+    Rows: 'Linhas',
     Save: 'Salvar',
     Server: 'Servidor',
     Settings: 'Ajustes',
