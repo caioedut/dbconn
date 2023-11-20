@@ -11,6 +11,7 @@ const light: ThemeEditProps = {
 
   custom: {
     id: 'light',
+    name: 'DbConn Light',
   },
 
   mode: 'light',

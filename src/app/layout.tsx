@@ -7,17 +7,18 @@ import Sidebar from '@/components/Sidebar';
 import { ConnectionProvider } from '@/contexts/ConnectionContext';
 import { TabsProvider } from '@/contexts/TabsContext';
 import { RobotoFont } from '@/fonts';
-
-import dark from '../../main/themes/dark';
+import useAppearance from '@/hooks/useAppearance';
 
 import './globals.css';
 import 'react-virtualized/styles.css';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const { theme } = useAppearance();
+
   return (
     <html lang="en">
       <body>
-        <ReactBulk theme={dark}>
+        <ReactBulk theme={theme}>
           <ConnectionProvider>
             <TabsProvider>
               <Box noWrap row className={RobotoFont.className} h="100%">

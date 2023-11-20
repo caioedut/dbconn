@@ -11,6 +11,7 @@ const dark: ThemeEditProps = {
 
   custom: {
     id: 'dark',
+    name: 'DbConn Dark',
   },
 
   mode: 'dark',

@@ -1,41 +1,34 @@
 'use client';
 
-import { ThemeProps, useTheme } from '@react-bulk/core';
-import { Box, Button, ButtonGroup, Grid, Scrollable } from '@react-bulk/web';
+import { useTheme } from '@react-bulk/core';
+import { Box, Grid, Scrollable } from '@react-bulk/web';
 
+import List from '@/components/List';
 import Panel from '@/components/Panel';
 import { t } from '@/helpers/translate.helper';
-
-import dark from '../../../main/themes/dark';
-import light from '../../../main/themes/light';
+import useAppearance, { themes } from '@/hooks/useAppearance';
+import useSettings from '@/hooks/useSettings';
 
 export default function Page() {
-  const { custom, setTheme } = useTheme();
-
-  const themes = [
-    { name: 'Light', theme: light },
-    { name: 'Dark', theme: dark },
-  ];
+  const settings = useSettings();
+  const { setThemeId } = useAppearance();
+  const { custom } = useTheme();
 
   return (
     <>
-      <Scrollable contentInset={2}>
+      <Scrollable hidden={settings.section !== 'appearance'}>
         <Grid>
           <Box lg={3} md={6} xs={12}>
             <Panel flex title={t('Theme')}>
-              <Box p={2}>
-                <ButtonGroup>
-                  {themes.map((theme, index) => (
-                    <Button
-                      key={index}
-                      variant={custom.id === theme.theme?.custom?.id ? 'solid' : 'outline'}
-                      onPress={() => setTheme(theme.theme as ThemeProps)}
-                    >
-                      {theme.name}
-                    </Button>
-                  ))}
-                </ButtonGroup>
-              </Box>
+              <Scrollable h={160}>
+                <List
+                  items={Object.values(themes).map((theme) => ({
+                    label: theme.custom?.name,
+                    endIcon: custom.id === theme.custom?.id ? 'Check' : undefined,
+                    onPress: () => setThemeId(theme.custom?.id),
+                  }))}
+                />
+              </Scrollable>
             </Panel>
           </Box>
         </Grid>

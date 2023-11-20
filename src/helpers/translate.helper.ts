@@ -5,6 +5,7 @@ const tokens = {
   'pt-BR': {
     Add: 'Adicionar',
     Alias: 'Apelido',
+    Appearance: 'Aparência',
     Cancel: 'Cancelar',
     Close: 'Fechar',
     Connect: 'Conectar',
@@ -34,6 +35,7 @@ const tokens = {
     Selected: 'Selecionado',
     Server: 'Servidor',
     Settings: 'Ajustes',
+    Shortcuts: 'Atalhos',
     Show: 'Mostrar',
     'Something went wrong': 'Houve um erro inesperado',
     Structs: 'Estruturas',
