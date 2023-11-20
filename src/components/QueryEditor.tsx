@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Panel as ResizablePanel,
   PanelGroup as ResizablePanelGroup,
@@ -44,7 +44,7 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<(QueryError | Result)[]>();
 
-  const sendQuery = async () => {
+  const sendQuery = useCallback(async () => {
     setIsLoading(true);
     setResults(undefined);
 
@@ -53,13 +53,29 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
 
     try {
       const response = await api.post('/query', connection?.id, text);
+      console.log('res', response);
       setResults(response?.data);
     } catch (err) {
+      console.log('err', err);
       toaster.error(getError(err));
     }
 
     setIsLoading(false);
-  };
+  }, [connection?.id]);
+
+  const handleKeyDown = useCallback(
+    (e: any) => {
+      if (e.key === 'F5' || (e.key === 'Enter' && e.ctrlKey)) {
+        sendQuery().catch(() => null);
+      }
+    },
+    [sendQuery],
+  );
+
+  const handlePaste = useCallback((e: ClipboardEvent) => {
+    e.preventDefault();
+    document.execCommand('inserttext', false, e.clipboardData?.getData('text/plain') ?? '');
+  }, []);
 
   useEffect(() => {
     setConnection(tab.id, connection);
@@ -79,21 +95,11 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
     }
   }, [editorRef]);
 
-  const handleKeyDown = (e: any) => {
-    if (e.key === 'F5' || (e.key === 'Enter' && e.ctrlKey)) {
-      sendQuery();
-    }
-  };
-
   return (
     <>
       <ResizablePanelGroup autoSaveId="example" direction="vertical">
-        <ResizablePanel collapsible>
-          <Panel
-            h="100%"
-            loading={isLoading}
-            // title={t('Query')}
-          >
+        <ResizablePanel minSizePixels={32} order={1}>
+          <Panel h="100%" loading={isLoading}>
             <Scrollable>
               <Box
                 ref={editorRef}
@@ -112,6 +118,7 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
                   outline: 'none !important',
                 }}
                 onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
               >
                 {sql ?? ''}
               </Box>
@@ -123,7 +130,7 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
           <>
             <ResizablePanelHandle style={{ height: 4 }} />
 
-            <ResizablePanel collapsible>
+            <ResizablePanel minSizePixels={32} order={2}>
               <QueryResults data={results} />
             </ResizablePanel>
           </>

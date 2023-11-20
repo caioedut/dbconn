@@ -1,5 +1,6 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 
+import { useTheme } from '@react-bulk/core';
 import { Box, Divider, Scrollable, Tabs, Text } from '@react-bulk/web';
 
 import Panel from '@/components/Panel';
@@ -28,6 +29,8 @@ const getDisplayValue = (value: Date | null | number | string | undefined) => {
 };
 
 function QueryResults({ data }: QueryResultsProps) {
+  const theme = useTheme();
+
   const [tab, setTab] = useState(0);
 
   const [resultsSelected, setResultsSelected] = useState<any>();
@@ -94,10 +97,10 @@ function QueryResults({ data }: QueryResultsProps) {
           tabs={(data || []).map((result, index) => ({
             label: (
               <>
-                <Text bold letterSpacing={1} variant="caption">
+                <Text bold color={theme.contrast('primary')} letterSpacing={1} variant="caption">
                   {t('RESULT')} #{index + 1}
                 </Text>
-                <Text right variant="caption">
+                <Text right color={theme.contrast('primary')} variant="caption">
                   {'error' in result ? t('ERROR') : `${result.rows.length} ${t('rows')}`}
                 </Text>
               </>

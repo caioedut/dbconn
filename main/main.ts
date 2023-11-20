@@ -1,9 +1,10 @@
-// Main File for Electron
-
 import { BrowserWindow, app, ipcMain } from 'electron';
+import serve from 'electron-serve';
+import path from 'path';
 
-const path = require('path');
-const serve = require('electron-serve');
+import api from './api';
+
+const isProd = process.env.NODE_ENV !== 'development';
 
 function handleSetTitle(event: any, title: string) {
   const webContents = event.sender;
@@ -26,7 +27,6 @@ const createSplashScreen = () => {
     }),
   );
   splash.setResizable(false);
-  console.log(__dirname);
   splash.loadURL('file://' + __dirname + '/../splash/index.html');
   splash.on('closed', () => (splash = null));
   splash.webContents.on('did-finish-load', () => {
@@ -36,8 +36,6 @@ const createSplashScreen = () => {
   });
 };
 
-// run renderer
-const isProd = process.env.NODE_ENV !== 'development';
 if (isProd) {
   serve({ directory: 'out' });
 } else {
@@ -96,4 +94,4 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-ipcMain.handle('api', require('./api/index').default);
+ipcMain.handle('api', api);

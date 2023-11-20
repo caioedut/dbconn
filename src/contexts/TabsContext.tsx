@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, createContext, useCallback, useState } from 'react';
+import { Dispatch, SetStateAction, createContext, useCallback, useMemo, useState } from 'react';
 import { useListState } from 'react-state-hooks';
 
 import { v4 as uuid } from 'uuid';
@@ -118,25 +118,24 @@ function TabsProvider({ children }: any) {
     goTo((index === 0 ? tabs.length : index) - 1);
   }, [tabs, active, goTo]);
 
-  return (
-    <TabsContext.Provider
-      value={{
-        active,
-        add,
-        close,
-        goTo,
-        goToNext,
-        goToPrev,
-        setActive,
-        setConnection,
-        setDatabase,
-        setTitle,
-        tabs,
-      }}
-    >
-      {children}
-    </TabsContext.Provider>
+  const value = useMemo(
+    () => ({
+      active,
+      add,
+      close,
+      goTo,
+      goToNext,
+      goToPrev,
+      setActive,
+      setConnection,
+      setDatabase,
+      setTitle,
+      tabs,
+    }),
+    [active, add, close, goTo, goToNext, goToPrev, setConnection, setDatabase, setTitle, tabs],
   );
+
+  return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>;
 }
 
 export { TabsContext, TabsProvider };

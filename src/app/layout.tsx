@@ -11,6 +11,7 @@ import { RobotoFont } from '@/fonts';
 import dark from '../../main/themes/dark';
 
 import './globals.css';
+import 'react-virtualized/styles.css';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

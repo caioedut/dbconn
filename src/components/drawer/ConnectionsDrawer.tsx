@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 import {
   Panel as ResizablePanel,
   PanelGroup as ResizablePanelGroup,
@@ -7,49 +7,30 @@ import {
 import { useObjectState } from 'react-state-hooks';
 
 import { AnyObject, FormRef, RbkFormEvent, useToaster } from '@react-bulk/core';
-import {
-  Animation,
-  Box,
-  Button,
-  Drawer,
-  Dropdown,
-  Form,
-  Grid,
-  Input,
-  Scrollable,
-  Select,
-  Tabs,
-  Text,
-} from '@react-bulk/web';
+import { Animation, Box, Button, Drawer, Form, Grid, Input, Scrollable, Select, Text } from '@react-bulk/web';
 import * as yup from 'yup';
 
 import Icon from '@/components/Icon';
-import List from '@/components/List';
 import Panel from '@/components/Panel';
 import State from '@/components/State';
+import TableList from '@/components/TableList';
 import { getError } from '@/helpers/api.helper';
 import { validate } from '@/helpers/form.helper';
 import { t } from '@/helpers/translate.helper';
 import useApiOnce from '@/hooks/useApiOnce';
 import useConnection from '@/hooks/useConnection';
 import useHotkey from '@/hooks/useHotkey';
-import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
 import { Connection, Database } from '@/types/database.type';
 
-export default function ConnectionsDrawer() {
+function ConnectionsDrawer() {
   const toaster = useToaster();
-  const { add } = useTabs();
-
-  const formConnectionRef = useRef<FormRef>();
 
   const { connection, database, setConnection, setDatabase } = useConnection();
 
+  const formConnectionRef = useRef<FormRef>();
+
   const [isConnecting, updateIsConnecting] = useObjectState<{ [key: string]: boolean }>({});
-
-  const [tablesTab, setTablesTab] = useState<'table' | 'view'>('table');
-
-  const [tableMenu, setTableMenu] = useState<string>();
 
   const [editModel, setEditModel] = useState<Partial<Connection>>();
 
@@ -68,33 +49,14 @@ export default function ConnectionsDrawer() {
     error: errorConnections,
     isValidating: isValidatingConnections,
     mutate: mutateConnections,
-  } = useApiOnce<any[]>('/connections');
+  } = useApiOnce<Connection[]>('/connections');
 
   const {
     data: databases,
     error: errorDatabases,
     isValidating: isValidatingDatabases,
     mutate: mutateDatabases,
-  } = useApiOnce<any[]>(connection && '/connections/databases', connection?.id);
-
-  const {
-    data: tables,
-    error: errorTables,
-    isValidating: isValidatingTables,
-    mutate: mutateTables,
-  } = useApiOnce<any[]>(connection && database && '/tables', connection?.id, database?.name);
-
-  const displayTablesHk = useHotkey({
-    callback: () => setTablesTab('table'),
-    ctrl: true,
-    key: 'F1',
-  });
-
-  const displayViewsHk = useHotkey({
-    callback: () => setTablesTab('view'),
-    ctrl: true,
-    key: 'F2',
-  });
+  } = useApiOnce<Database[]>(connection && '/connections/databases', connection?.id);
 
   const handleChangeType = (type: string) => {
     setEditType(type);
@@ -204,25 +166,6 @@ export default function ConnectionsDrawer() {
     }
   };
 
-  const handleSelectTop = async (e: Event, tableName: string, limit: number) => {
-    e.stopPropagation();
-
-    setTableMenu(undefined);
-
-    try {
-      const response = await api.get('/query/topQuery', connection?.id, tableName, limit);
-
-      add({
-        props: {
-          autoRun: true,
-          sql: response.data,
-        },
-      });
-    } catch (err) {
-      toaster.error(getError(err));
-    }
-  };
-
   const newConnHk = useHotkey({
     callback: () => setEditModel({}),
     ctrl: true,
@@ -237,7 +180,7 @@ export default function ConnectionsDrawer() {
   return (
     <>
       <ResizablePanelGroup autoSaveId="example" direction="vertical">
-        <ResizablePanel collapsible>
+        <ResizablePanel minSizePixels={32} order={1}>
           <Panel
             h="100%"
             loading={isValidatingConnections || isValidatingDatabases}
@@ -311,6 +254,15 @@ export default function ConnectionsDrawer() {
                           <Button
                             circular
                             size="xsmall"
+                            title={t('Refresh')}
+                            variant="text"
+                            onPress={() => mutateDatabases()}
+                          >
+                            <Icon name="RefreshCw" />
+                          </Button>
+                          <Button
+                            circular
+                            size="xsmall"
                             title={t('Edit')}
                             variant="text"
                             onPress={(e: Event) => handleEditConnection(e, conn)}
@@ -329,27 +281,30 @@ export default function ConnectionsDrawer() {
                         </Box>
                       </Box>
 
-                      {isConnSelected &&
-                        databases?.map((db, index) => {
-                          const isSelected = db.name === database?.name;
+                      {isConnSelected && (
+                        <State error={errorDatabases}>
+                          {databases?.map((db, index) => {
+                            const isSelected = db.name === database?.name;
 
-                          return (
-                            <Box
-                              key={index}
-                              style={{ '&:hover': { bg: 'primary.main.25' } }}
-                              onPress={(e: Event) => handleSelectDatabase(e, db)}
-                            >
-                              <Box center noWrap row ml={4} p={1}>
-                                <Box h={12} ml={1} w={12}>
-                                  {isSelected && <Icon name="ChevronsRight" size={12} />}
+                            return (
+                              <Box
+                                key={index}
+                                style={{ '&:hover': { bg: 'primary.main.25' } }}
+                                onPress={(e: Event) => handleSelectDatabase(e, db)}
+                              >
+                                <Box center noWrap row ml={4} p={1}>
+                                  <Box h={12} ml={1} w={12}>
+                                    {isSelected && <Icon name="ChevronsRight" size={12} />}
+                                  </Box>
+                                  <Text flex bold={isSelected} ml={2} numberOfLines={1} variant="secondary">
+                                    {db.name}
+                                  </Text>
                                 </Box>
-                                <Text flex bold={isSelected} ml={2} numberOfLines={1} variant="secondary">
-                                  {db.name}
-                                </Text>
                               </Box>
-                            </Box>
-                          );
-                        })}
+                            );
+                          })}
+                        </State>
+                      )}
                     </Box>
                   );
                 })}
@@ -360,87 +315,8 @@ export default function ConnectionsDrawer() {
 
         <ResizablePanelHandle style={{ height: 4 }} />
 
-        <ResizablePanel collapsible>
-          <Panel
-            h="100%"
-            loading={isValidatingTables}
-            right={
-              <Button circular size="xsmall" title={t('Refresh')} variant="text" onPress={() => mutateTables()}>
-                <Icon color="contrast" name="RefreshCw" />
-              </Button>
-            }
-            title={t('Structs')}
-          >
-            <State error={errorTables}>
-              <Box center p={2}>
-                <Tabs
-                  size="small"
-                  tabs={[
-                    { title: displayTablesHk.title, label: t('Tables'), value: 'table' },
-                    { title: displayViewsHk.title, label: t('Views'), value: 'view' },
-                  ]}
-                  value={tablesTab}
-                  variant="nav"
-                  onChange={(_, value: any) => setTablesTab(value)}
-                />
-              </Box>
-
-              <Scrollable>
-                {tables
-                  ?.filter((table) => table.type === tablesTab)
-                  ?.map((table) => (
-                    <Box key={table.name} style={{ '&:hover': { bg: 'primary.main.25' } }}>
-                      <Box center noWrap row p={1}>
-                        <Box h={12} ml={1} w={12}>
-                          <Icon name="Table" size={12} />
-                        </Box>
-                        <Text flex ml={2} numberOfLines={1}>
-                          {table.name}
-                        </Text>
-                        <Button
-                          circular
-                          size="xsmall"
-                          title="SELECT TOP 10"
-                          variant="text"
-                          onPress={(e: Event) => handleSelectTop(e, table.name, 10)}
-                        >
-                          10
-                        </Button>
-                        <Button
-                          circular
-                          size="xsmall"
-                          title={`${t('More')}...`}
-                          variant="text"
-                          onPress={() => setTableMenu(table.name)}
-                        >
-                          <Icon name="Menu" />
-                        </Button>
-                        <Dropdown visible={table.name === tableMenu} onClose={() => setTableMenu(undefined)}>
-                          <List
-                            corners={1}
-                            items={[
-                              {
-                                label: 'SELECT TOP 100',
-                                icon: 'Code',
-                                onPress: (e: Event) => handleSelectTop(e, table.name, 100),
-                              },
-                              {
-                                label: 'SELECT TOP 1000',
-                                icon: 'Code',
-                                onPress: (e: Event) => handleSelectTop(e, table.name, 1000),
-                              },
-                              { divider: true },
-                            ]}
-                            overflow="hidden"
-                            w={200}
-                          />
-                        </Dropdown>
-                      </Box>
-                    </Box>
-                  ))}
-              </Scrollable>
-            </State>
-          </Panel>
+        <ResizablePanel minSizePixels={32} order={2}>
+          <TableList />
         </ResizablePanel>
       </ResizablePanelGroup>
 
@@ -523,3 +399,5 @@ export default function ConnectionsDrawer() {
     </>
   );
 }
+
+export default memo(ConnectionsDrawer);

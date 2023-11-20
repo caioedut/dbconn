@@ -55,7 +55,7 @@ export default function Sidebar() {
               title={link.name}
               variant={isSelected ? 'solid' : 'text'}
             >
-              <Icon color="text" name={link.icon} size="1.5rem" />
+              <Icon color={isSelected ? 'contrast' : 'text'} name={link.icon} size="1.5rem" />
             </Button>
           </Box>
         );
