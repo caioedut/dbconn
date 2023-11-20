@@ -11,7 +11,7 @@ export default async function getTables(conn: ConnRef) {
   const [result] = await query(conn, rawQuery);
 
   if ('error' in result) {
-    return result;
+    throw result;
   }
 
   return result.rows.map((row: any) => ({

@@ -1,18 +1,15 @@
-import { Response } from '../types/api.type';
+import { AnyObject } from '@react-bulk/core';
 
 export default async function api(_: Electron.IpcMainInvokeEvent, route: string, ...args: any[]) {
   const [type = 'GET', controller, method = 'index'] = route.split('/').filter(Boolean);
 
-  // @ts-expect-error
-  const response: Response = {};
+  const response: AnyObject = {};
 
   try {
-    // @ts-expect-error
     response.data = await require(`./${controller}`)[`${type}_${method}`](...args);
     response.ok = true;
   } catch (err) {
     response.ok = false;
-    // @ts-expect-error
     response.error = err;
   }
 

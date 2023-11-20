@@ -12,7 +12,7 @@ function create(method: 'DELETE' | 'GET' | 'POST' | 'PUT') {
           const res = await ipcRenderer.invoke('api', `${method}/${route}`, ...args);
 
           if (!res?.ok) {
-            throw res;
+            throw res.error;
           }
 
           resolve(res);

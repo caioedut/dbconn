@@ -53,10 +53,8 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
 
     try {
       const response = await api.post('/query', connection?.id, text);
-      console.log('res', response);
       setResults(response?.data);
     } catch (err) {
-      console.log('err', err);
       toaster.error(getError(err));
     }
 

@@ -15,8 +15,6 @@ import useHotkey from '@/hooks/useHotkey';
 import { Table } from '@/types/database.type';
 
 function TableList() {
-  const theme = useTheme();
-
   const { connection, database } = useConnection();
 
   const [tablesTab, setTablesTab] = useState<'table' | 'view'>('table');
