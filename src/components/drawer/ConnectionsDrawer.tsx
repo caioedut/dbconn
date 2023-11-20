@@ -10,6 +10,7 @@ import { AnyObject, FormRef, RbkFormEvent, useToaster } from '@react-bulk/core';
 import { Animation, Box, Button, Drawer, Form, Grid, Input, Scrollable, Select, Text } from '@react-bulk/web';
 import * as yup from 'yup';
 
+import DatabaseList from '@/components/DatabaseList';
 import Icon from '@/components/Icon';
 import Panel from '@/components/Panel';
 import State from '@/components/State';
@@ -21,12 +22,12 @@ import useApiOnce from '@/hooks/useApiOnce';
 import useConnection from '@/hooks/useConnection';
 import useHotkey from '@/hooks/useHotkey';
 import api from '@/services/api';
-import { Connection, Database } from '@/types/database.type';
+import { Connection } from '@/types/database.type';
 
 function ConnectionsDrawer() {
   const toaster = useToaster();
 
-  const { connection, database, setConnection, setDatabase } = useConnection();
+  const { setConnection, setDatabase } = useConnection();
 
   const formConnectionRef = useRef<FormRef>();
 
@@ -50,13 +51,6 @@ function ConnectionsDrawer() {
     isValidating: isValidatingConnections,
     mutate: mutateConnections,
   } = useApiOnce<Connection[]>('/connections');
-
-  const {
-    data: databases,
-    error: errorDatabases,
-    isValidating: isValidatingDatabases,
-    mutate: mutateDatabases,
-  } = useApiOnce<Database[]>(connection && '/connections/databases', connection?.id);
 
   const handleChangeType = (type: string) => {
     setEditType(type);
@@ -153,19 +147,6 @@ function ConnectionsDrawer() {
     setDatabase(undefined);
   };
 
-  const handleSelectDatabase = async (e: Event, db: Database) => {
-    e.stopPropagation();
-
-    if (db.name !== database?.name) {
-      try {
-        await api.post('/connections/databases', connection?.id, db.name);
-        setDatabase(db);
-      } catch (err) {
-        toaster.error(getError(err));
-      }
-    }
-  };
-
   const newConnHk = useHotkey({
     callback: () => setEditModel({}),
     ctrl: true,
@@ -183,7 +164,7 @@ function ConnectionsDrawer() {
         <ResizablePanel minSizePixels={32} order={1}>
           <Panel
             h="100%"
-            loading={isValidatingConnections || isValidatingDatabases}
+            loading={isValidatingConnections}
             right={
               <Button
                 circular
@@ -199,115 +180,82 @@ function ConnectionsDrawer() {
           >
             <State error={errorConnections}>
               <Scrollable>
-                {connections?.map((conn, index) => {
-                  const isConnSelected = conn.id === connection?.id;
-
-                  return (
-                    <Box key={index}>
-                      <Box
-                        style={{ '&:hover': { bg: 'primary.main.25' } }}
-                        onPress={(e: Event) => handleConnect(e, conn)}
-                      >
-                        <Box center noWrap row p={1} style={{ gap: 4 }}>
-                          <Box
-                            center
-                            bg={isConnecting[conn.id] ? 'warning' : conn.connected ? 'success' : 'error'}
-                            corners={3}
-                            h={12}
-                            ml={1}
-                            w={12}
-                          >
-                            {isConnecting[conn.id] && (
-                              <Animation in loop zoom direction="alternate" duration={500} timing="linear">
-                                <Box bg="warning.light" corners={3} h={12} w={12} />
-                              </Animation>
-                            )}
-                          </Box>
-
-                          <Text flex ml={1} numberOfLines={1}>
-                            {conn.name || conn.host}
-                          </Text>
-
-                          {!conn.connected ? (
-                            <Button
-                              circular
-                              color="yellow"
-                              size="xsmall"
-                              title={t('Connect')}
-                              variant="text"
-                              onPress={(e: Event) => handleConnect(e, conn)}
-                            >
-                              <Icon color="yellow" name="Zap" />
-                            </Button>
-                          ) : (
-                            <Button
-                              circular
-                              color="error"
-                              size="xsmall"
-                              title={t('Disconnect')}
-                              variant="text"
-                              onPress={(e: Event) => handleDisconnect(e, conn)}
-                            >
-                              <Icon color="error" name="ZapOff" />
-                            </Button>
+                {connections?.map((conn, index) => (
+                  <Box key={index}>
+                    <Box
+                      style={{ '&:hover': { bg: 'primary.main.25' } }}
+                      onPress={(e: Event) => handleConnect(e, conn)}
+                    >
+                      <Box center noWrap row p={1} style={{ gap: 4 }}>
+                        <Box
+                          center
+                          bg={isConnecting[conn.id] ? 'warning' : conn.connected ? 'success' : 'error'}
+                          corners={3}
+                          h={12}
+                          ml={1}
+                          title={t(
+                            isConnecting[conn.id] ? 'Connecting' : conn.connected ? 'Connected' : 'Disconnected',
                           )}
-                          <Button
-                            circular
-                            size="xsmall"
-                            title={t('Refresh')}
-                            variant="text"
-                            onPress={() => mutateDatabases()}
-                          >
-                            <Icon name="RefreshCw" />
-                          </Button>
-                          <Button
-                            circular
-                            size="xsmall"
-                            title={t('Edit')}
-                            variant="text"
-                            onPress={(e: Event) => handleEditConnection(e, conn)}
-                          >
-                            <Icon name="Edit2" />
-                          </Button>
-                          <Button
-                            circular
-                            size="xsmall"
-                            title={t('Remove')}
-                            variant="text"
-                            onPress={(e: Event) => handleDeleteConnection(e, conn)}
-                          >
-                            <Icon name="Trash" />
-                          </Button>
+                          w={12}
+                        >
+                          {isConnecting[conn.id] && (
+                            <Animation in loop zoom direction="alternate" duration={500} timing="linear">
+                              <Box bg="warning.light" corners={3} h={12} w={12} />
+                            </Animation>
+                          )}
                         </Box>
+
+                        <Text flex ml={1} numberOfLines={1}>
+                          {conn.name || conn.host}
+                        </Text>
+
+                        {!conn.connected ? (
+                          <Button
+                            circular
+                            color="yellow"
+                            size="xsmall"
+                            title={t('Connect')}
+                            variant="text"
+                            onPress={(e: Event) => handleConnect(e, conn)}
+                          >
+                            <Icon color="yellow" name="Zap" />
+                          </Button>
+                        ) : (
+                          <Button
+                            circular
+                            color="error"
+                            size="xsmall"
+                            title={t('Disconnect')}
+                            variant="text"
+                            onPress={(e: Event) => handleDisconnect(e, conn)}
+                          >
+                            <Icon color="error" name="ZapOff" />
+                          </Button>
+                        )}
+                        <Button
+                          circular
+                          size="xsmall"
+                          title={t('Edit')}
+                          variant="text"
+                          onPress={(e: Event) => handleEditConnection(e, conn)}
+                        >
+                          <Icon name="Edit2" />
+                        </Button>
+                        <Button
+                          circular
+                          size="xsmall"
+                          title={t('Remove')}
+                          variant="text"
+                          onPress={(e: Event) => handleDeleteConnection(e, conn)}
+                        >
+                          <Icon name="Trash" />
+                        </Button>
                       </Box>
-
-                      {isConnSelected && (
-                        <State error={errorDatabases}>
-                          {databases?.map((db, index) => {
-                            const isSelected = db.name === database?.name;
-
-                            return (
-                              <Box
-                                key={index}
-                                style={{ '&:hover': { bg: 'primary.main.25' } }}
-                                onPress={(e: Event) => handleSelectDatabase(e, db)}
-                              >
-                                <Box center noWrap row ml={4} p={1}>
-                                  <Box h={12} ml={1} w={12}>
-                                    {isSelected && <Icon name="ChevronsRight" size={12} />}
-                                  </Box>
-                                  <Text flex bold={isSelected} ml={2} numberOfLines={1} variant="secondary">
-                                    {db.name}
-                                  </Text>
-                                </Box>
-                              </Box>
-                            );
-                          })}
-                        </State>
-                      )}
                     </Box>
-                  );
-                })}
+
+                    <DatabaseList key={index} connection={conn} />
+                  </Box>
+                ))}
               </Scrollable>
             </State>
           </Panel>

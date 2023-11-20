@@ -6,7 +6,7 @@ const dark: ThemeEditProps = {
   ...base,
 
   colors: {
-    primary: '#6573c3',
+    primary: '#2979ff',
   },
 
   custom: {

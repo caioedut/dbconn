@@ -45,7 +45,7 @@
     "react-dom": "^18.2.0",
     "react-feather": "^2.0.10",
     "react-resizable-panels": "^0.0.57",
-    "react-state-hooks": "^0.1.6",
+    "react-state-hooks": "^0.1.7",
     "react-virtualized": "^9.22.5",
     "swr": "^2.2.0",
     "tedious": "^16.6.0",
