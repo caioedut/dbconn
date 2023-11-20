@@ -5,8 +5,7 @@ import { v4 as uuid } from 'uuid';
 
 import { QueryEditorProps } from '@/components/QueryEditor';
 import useConnection from '@/hooks/useConnection';
-
-import { Connection, Database } from '../../types/database.type';
+import { Connection, Database } from '@/types/database.type';
 
 export type Tab = {
   connection?: Connection;

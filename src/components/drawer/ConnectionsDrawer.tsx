@@ -35,8 +35,7 @@ import useConnection from '@/hooks/useConnection';
 import useHotkey from '@/hooks/useHotkey';
 import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
-
-import { Connection, Database } from '../../../types/database.type';
+import { Connection, Database } from '@/types/database.type';
 
 export default function ConnectionsDrawer() {
   const toaster = useToaster();

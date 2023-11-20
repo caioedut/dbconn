@@ -16,8 +16,7 @@ import { getError } from '@/helpers/api.helper';
 import useConnection from '@/hooks/useConnection';
 import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
-
-import { QueryError, Result } from '../../types/database.type';
+import { QueryError, Result } from '@/types/database.type';
 
 export type QueryEditorProps = {
   autoRun?: boolean;

@@ -5,8 +5,7 @@ import { Box, Divider, Scrollable, Tabs, Text } from '@react-bulk/web';
 import Panel from '@/components/Panel';
 import { RobotoMonoFont } from '@/fonts';
 import { t } from '@/helpers/translate.helper';
-
-import { QueryError, Result } from '../../types/database.type';
+import { QueryError, Result } from '@/types/database.type';
 
 export type QueryResultsProps = {
   data?: (QueryError | Result)[];

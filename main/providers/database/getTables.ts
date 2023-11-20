@@ -10,6 +10,10 @@ export default async function getTables(conn: ConnRef) {
 
   const [result] = await query(conn, rawQuery);
 
+  if ('error' in result) {
+    return result;
+  }
+
   return result.rows.map((row: any) => ({
     name: row.name,
     type:

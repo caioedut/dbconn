@@ -17,51 +17,71 @@ export default async function query(conn: ConnRef, query?: string) {
   const promises = [];
 
   for (const queryLine of queries) {
-    const promise = conn.current.raw(queryLine).then((res) => {
-      let rows = [];
-      let fields = [];
+    const promise = conn.current
+      .raw(queryLine)
+      .then((res) => {
+        let rows = [];
+        let fields = [];
 
-      if (conn.type === 'mssql') {
-        rows = res;
-      }
+        if (conn.type === 'mssql') {
+          rows = res;
 
-      if (conn.type === 'mysql') {
-        rows = res[0];
-        fields = res[1].map((field: MySqlField) => ({
-          name: field.name,
-          type: MySqlTypes[field.type as keyof typeof MySqlTypes],
-        }));
+          // TODO: get column types
+          if (rows.length) {
+            fields = Object.keys(rows[0]).map((name) => ({ name }));
+          }
+        }
 
-        // writeFileSync('database.json', JSON.stringify(res[1], null, 2), 'utf-8');
-      }
+        if (conn.type === 'mysql') {
+          rows = res[0];
+          fields = res[1].map((field: MySqlField) => ({
+            name: field.name,
+            type: MySqlTypes[field.type as keyof typeof MySqlTypes],
+          }));
+        }
 
-      if (conn.type === 'pg') {
-        rows = res.rows;
-        fields = res.fields.map((field: PgField) => ({
-          name: field.name,
-          type: PgTypes[field.dataTypeID as keyof typeof PgTypes] ?? null,
-        }));
-      }
+        if (conn.type === 'pg') {
+          rows = res.rows;
+          fields = res.fields.map((field: PgField) => ({
+            name: field.name,
+            type: PgTypes[field.dataTypeID as keyof typeof PgTypes] ?? null,
+          }));
+        }
 
-      return { fields, rows };
-    });
+        return { fields, rows };
+      })
+      .catch((err) => {
+        const error = true;
+        let code: null | string = null;
+        let state: null | string = null;
+        let symbol: null | string = null;
+        let message: null | string = null;
 
-    promises.push(
-      promise,
-      // .then((res) => ({
-      //   fields: res?.[1]?.map((field) => field.name) || [],
-      //   rows: res?.[0] || [],
-      // }))
-      // .catch((err) => {
-      //   return {
-      //     code: err.errno,
-      //     error: true,
-      //     message: err.message,
-      //     state: err.sqlState,
-      //     symbol: err.code,
-      //   } satisfies QueryError;
-      // }),
-    );
+        if (conn.type === 'mssql') {
+          code = err.number;
+          state = err.state;
+          symbol = err.code;
+          message = err.message;
+        }
+
+        if (conn.type === 'mysql') {
+          code = err.errno;
+          state = err.sqlState;
+          symbol = err.code;
+          message = err.message;
+        }
+
+        if (conn.type === 'pg') {
+          code = err.code;
+          state = err.code;
+          symbol = err.severity;
+          message = err.message;
+        }
+
+        return { code, error, message, state, symbol };
+      });
+
+    promises.push(promise);
   }
 
   return await Promise.all(promises);

@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, createContext, useState } from 'react';
 
-import { Connection, Database } from '../../types/database.type';
+import { Connection, Database } from '@/types/database.type';
 
 const ConnectionContext = createContext<{
   connection?: Connection;

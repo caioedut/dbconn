@@ -28,7 +28,7 @@ export type Result = {
 };
 
 export type QueryError = {
-  code: number;
+  code: number | string;
   error: true;
   message: string;
   state: string;
