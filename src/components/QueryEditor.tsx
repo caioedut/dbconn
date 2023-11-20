@@ -7,12 +7,14 @@ import {
 
 import { useToaster } from '@react-bulk/core';
 import { Box, Scrollable } from '@react-bulk/web';
+import { highlight } from 'sql-highlight';
 
 import Panel from '@/components/Panel';
 import QueryResults from '@/components/QueryResults';
 import { Tab } from '@/contexts/TabsContext';
 import { RobotoMonoFont } from '@/fonts';
 import { getError } from '@/helpers/api.helper';
+import { restoreSelection, saveSelection } from '@/helpers/selection.helper';
 import useConnection from '@/hooks/useConnection';
 import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
@@ -75,6 +77,13 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
     document.execCommand('inserttext', false, e.clipboardData?.getData('text/plain') ?? '');
   }, []);
 
+  const handleChange = useCallback(() => {
+    const $editor = editorRef.current as Element;
+    const selection = saveSelection($editor);
+    editorRef.current!.innerHTML = highlight($editor.textContent ?? '', { html: true });
+    restoreSelection($editor, selection);
+  }, []);
+
   useEffect(() => {
     setConnection(tab.id, connection);
   }, [tab.id, connection, setConnection]);
@@ -107,19 +116,28 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
                 autoCapitalize="none"
                 autoCorrect="off"
                 className={RobotoMonoFont.className}
+                dangerouslySetInnerHTML={{ __html: highlight(sql ?? '', { html: true }) }}
                 h="100%"
                 p={2}
                 spellCheck={false}
                 style={{
-                  letterSpacing: 0.5,
+                  '& .sql-hl-bracket': { color: 'editor.bracket' },
+                  '& .sql-hl-comment': { color: 'editor.comment', fontWeight: 400 },
+                  '& .sql-hl-function': { color: 'editor.function' },
+                  '& .sql-hl-keyword': { color: 'editor.keyword' },
+                  '& .sql-hl-number': { color: 'editor.number' },
+                  '& .sql-hl-special': { color: 'editor.special' },
+                  '& .sql-hl-string': { color: 'editor.string' },
+
+                  fontWeight: 500,
+                  letterSpacing: 1,
                   lineHeight: 1.35,
                   outline: 'none !important',
                 }}
+                onInput={handleChange}
                 onKeyDown={handleKeyDown}
                 onPaste={handlePaste}
-              >
-                {sql ?? ''}
-              </Box>
+              />
             </Scrollable>
           </Panel>
         </ResizablePanel>
