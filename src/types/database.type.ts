@@ -16,6 +16,7 @@ export type Database = {
 
 export type Table = {
   name: string;
+  schema: string;
   type: 'function' | 'procedure' | 'table' | 'view';
 };
 

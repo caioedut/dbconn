@@ -26,6 +26,10 @@ export type QueryEditorProps = {
   tab: Tab;
 };
 
+const parseHTML = (text: string) => {
+  return highlight(text, { html: true }).replace(/\n/g, '<br>');
+};
+
 function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
   const toaster = useToaster();
   const connectionContext = useConnection();
@@ -78,9 +82,9 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
   }, []);
 
   const handleChange = useCallback(() => {
-    const $editor = editorRef.current as Element;
+    const $editor = editorRef.current as HTMLDivElement;
     const selection = saveSelection($editor);
-    editorRef.current!.innerHTML = highlight($editor.textContent ?? '', { html: true });
+    editorRef.current!.innerHTML = parseHTML($editor.innerText);
     restoreSelection($editor, selection);
   }, []);
 
@@ -116,7 +120,7 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
                 autoCapitalize="none"
                 autoCorrect="off"
                 className={RobotoMonoFont.className}
-                dangerouslySetInnerHTML={{ __html: highlight(sql ?? '', { html: true }) }}
+                dangerouslySetInnerHTML={{ __html: parseHTML(sql ?? '') }}
                 h="100%"
                 p={2}
                 spellCheck={false}

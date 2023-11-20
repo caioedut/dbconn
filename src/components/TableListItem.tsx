@@ -24,11 +24,12 @@ function TableListItem({ rawStyle, style, table }: TableListItemProps) {
   const { add } = useTabs();
 
   const handleSelectTop = useCallback(
-    async (e: Event, tableName: string, limit: number) => {
+    async (e: Event, table: Table, limit: number) => {
       e.stopPropagation();
 
       try {
-        const response = await api.get('/query/topQuery', connection?.id, tableName, limit);
+        const source = [table.schema, table.name].filter(Boolean).join('.');
+        const response = await api.get('/query/topQuery', connection?.id, source, limit);
 
         add({
           props: { autoRun: true, sql: response.data },
@@ -47,6 +48,7 @@ function TableListItem({ rawStyle, style, table }: TableListItemProps) {
           <Icon name="Table" size={12} />
         </Box>
         <Text flex ml={1} numberOfLines={1}>
+          {Boolean(table.schema) && `${table.schema}.`}
           {table.name}
         </Text>
         <Button
@@ -54,7 +56,7 @@ function TableListItem({ rawStyle, style, table }: TableListItemProps) {
           size="xsmall"
           title="SELECT TOP 10"
           variant="text"
-          onPress={(e: Event) => handleSelectTop(e, table.name, 10)}
+          onPress={(e: Event) => handleSelectTop(e, table, 10)}
         >
           10
         </Button>
@@ -63,7 +65,7 @@ function TableListItem({ rawStyle, style, table }: TableListItemProps) {
           size="xsmall"
           title="SELECT TOP 1000"
           variant="text"
-          onPress={(e: Event) => handleSelectTop(e, table.name, 1000)}
+          onPress={(e: Event) => handleSelectTop(e, table, 1000)}
         >
           1000
         </Button>
