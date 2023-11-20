@@ -2,7 +2,8 @@ import { v4 as uuid } from 'uuid';
 
 import deleteConnection from '../providers/database/deleteConnection';
 import getConnection from '../providers/database/getConnection';
-import service from '../providers/database/service';
+import getDatabases from '../providers/database/getDatabases';
+import setDatabase from '../providers/database/setDatabase';
 import store from '../providers/store';
 import { ConnRef } from '../types/database.type';
 
@@ -14,15 +15,15 @@ export async function GET_index() {
   });
 }
 
-export async function POST_index(data: ConnRef<any>) {
+export async function POST_index(data: ConnRef) {
   const connections = store.connections.get();
 
   let id = data.id;
-  let model: ConnRef<any> | undefined;
+  let model: ConnRef | undefined;
 
   if (!id) {
     id = uuid();
-    model = { id } as ConnRef<any>;
+    model = { id } as ConnRef;
     connections.push(model);
   } else {
     model = connections.find((item) => item.id === id);
@@ -57,13 +58,13 @@ export async function POST_disconnect(id: string) {
 export async function GET_databases(id: string) {
   const conn = await getConnection(id);
 
-  return service(conn.type, 'getDatabases')(conn);
+  return getDatabases(conn);
 }
 
 export async function POST_databases(id: string, database: string) {
   const conn = await getConnection(id);
 
-  await service(conn.type, 'setDatabase')(conn, database);
+  await setDatabase(conn, database);
 
   return { connected: true };
 }

@@ -1,7 +1,7 @@
 import { ConnRef } from '../../types/database.type';
 
 const connections: {
-  [key: string]: ConnRef<any>;
+  [key: string]: ConnRef;
 } = {};
 
 export default connections;

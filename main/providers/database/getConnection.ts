@@ -1,20 +1,19 @@
 import { ConnRef } from '../../types/database.type';
 import store from '../store';
+import connect from './connect';
 import connections from './connections';
 
-export default async function getConnection<T>(id: string): Promise<ConnRef<T>> {
+export default async function getConnection(id: string): Promise<ConnRef> {
   if (!connections[id]) {
-    const conn = store.connections.get().find((item) => item.id === id);
+    const options = store.connections.get().find((item) => item.id === id);
 
-    if (!conn) {
+    if (!options) {
       throw new Error('Connection not found');
     }
 
-    const connect = require(`../database/${conn.type}/connect`).default;
-
     connections[id] = {
-      ...conn,
-      current: await connect(conn),
+      ...options,
+      current: await connect(options),
     };
   }
 

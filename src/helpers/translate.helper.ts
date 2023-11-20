@@ -37,7 +37,7 @@ const tokens = {
     Test: 'Testar',
     Theme: 'Tema',
     Type: 'Tipo',
-    Username: 'Usuário',
+    User: 'Usuário',
   },
 };
 

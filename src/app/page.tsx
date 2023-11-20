@@ -95,7 +95,7 @@ export default function Page() {
             const textColor = theme.contrast(isActive ? 'primary' : 'background');
             const title = `${(tab?.connection?.name || tab?.connection?.host) ?? '-----'} /// ${
               tab?.database?.name ?? '-----'
-            } /// ${tab?.connection?.username ?? '-----'}`;
+            } /// ${tab?.connection?.user ?? '-----'}`;
 
             return (
               <Box

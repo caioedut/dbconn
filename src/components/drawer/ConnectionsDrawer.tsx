@@ -61,7 +61,7 @@ export default function ConnectionsDrawer() {
     host: true,
     password: true,
     port: true,
-    username: true,
+    user: true,
   });
 
   const {
@@ -140,7 +140,7 @@ export default function ConnectionsDrawer() {
       password: editRequired.password ? yup.string().required() : yup.string().nullable(),
       port: editRequired.port ? yup.string().required() : yup.string().nullable(),
       type: yup.string().required(),
-      username: editRequired.username ? yup.string().required() : yup.string().nullable(),
+      user: editRequired.user ? yup.string().required() : yup.string().nullable(),
     });
 
     e.form.setErrors(errors);
@@ -471,14 +471,15 @@ export default function ConnectionsDrawer() {
                     <Input label={t('Server') + (editRequired.host ? ' *' : '')} name="host" value={editModel?.host} />
                   </Box>
                   <Box xs={4}>
-                    <Input label={t('Port') + (editRequired.port ? ' *' : '')} name="port" value={editModel?.port} />
+                    <Input
+                      label={t('Port') + (editRequired.port ? ' *' : '')}
+                      name="port"
+                      unmask={(value) => (value ? Number(value) : null)}
+                      value={editModel?.port}
+                    />
                   </Box>
                   <Box xs={12}>
-                    <Input
-                      label={t('Username') + (editRequired.username ? ' *' : '')}
-                      name="username"
-                      value={editModel?.username}
-                    />
+                    <Input label={t('User') + (editRequired.user ? ' *' : '')} name="user" value={editModel?.user} />
                   </Box>
                   <Box xs={12}>
                     <Input

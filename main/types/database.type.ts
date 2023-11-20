@@ -1,13 +1,15 @@
-export type ConnRef<T> = {
+import { Knex } from 'knex';
+
+export type ConnRef = {
   connected?: boolean;
-  current: T;
+  current: Knex;
   database: string;
   host: string;
   id: string;
   password: string;
   port: number;
   type: 'mssql' | 'mysql' | 'pg';
-  username: string;
+  user: string;
 };
 
 export type Connect = {
@@ -17,5 +19,5 @@ export type Connect = {
   password?: string;
   port?: number;
   type: 'mssql' | 'mysql' | 'pg';
-  username: string;
+  user: string;
 };

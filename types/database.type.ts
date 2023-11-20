@@ -7,7 +7,7 @@ export type Connection = {
   password: string;
   port: number;
   type: 'mssql' | 'mysql' | 'pg';
-  username: string;
+  user: string;
 };
 
 export type Database = {
@@ -20,7 +20,10 @@ export type Table = {
 };
 
 export type Result = {
-  fields: string[];
+  fields: {
+    name: string;
+    type: string;
+  }[];
   rows: any[];
 };
 

@@ -134,7 +134,12 @@ function QueryResults({ data }: QueryResultsProps) {
                     </Box>
                     {result.fields.map((field, fieldIndex) => (
                       <Box key={fieldIndex} component="th" noRootStyles style={[thStyle, cellStyle]}>
-                        {field}
+                        <Text fontSize="inherit" numberOfLines={1}>
+                          {field.name}
+                        </Text>
+                        <Text color="text.secondary" fontSize=".75em" mt={0.5}>
+                          ({field.type ?? '?'})
+                        </Text>
                       </Box>
                     ))}
                   </tr>
@@ -147,9 +152,9 @@ function QueryResults({ data }: QueryResultsProps) {
                         <Divider vertical opacity={1} style={counterStyle} />
                       </Box>
                       {result.fields.map((field, fieldIndex) => {
-                        const selectionKey = `${index}_${rowIndex}_${field}`;
+                        const selectionKey = `${index}_${rowIndex}_${field.name}`;
                         const isSelected = selectionKey === resultsSelected;
-                        const displayValue = getDisplayValue(row?.[field]);
+                        const displayValue = getDisplayValue(row?.[field.name]);
 
                         return (
                           <Box

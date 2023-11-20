@@ -16,19 +16,20 @@ const store = {
           password: '',
           port: '3306',
           type: 'mysql',
-          username: 'root',
+          user: 'root',
         },
-      ]) as ConnRef<any>[];
+      ]) as ConnRef[];
 
       return items.map((item) => {
         return { ...item, connected: Boolean(connections[item.id]?.current) };
-      }) as ConnRef<any>[];
+      }) as ConnRef[];
     },
-    set(value: ConnRef<any>[]) {
+    set(value: ConnRef[]) {
       internal.set(
         'connections',
         (value || []).map((item) => {
           delete item.connected;
+          // @ts-expect-error
           delete item.current;
           return item;
         }),
