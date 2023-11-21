@@ -7,7 +7,7 @@ export default async function connect(options: Connect) {
 
   const client = type === 'mysql' ? 'mysql2' : type;
 
-  return knex({
+  const conn = knex({
     client,
     connection: {
       database: database ?? undefined,
@@ -17,4 +17,12 @@ export default async function connect(options: Connect) {
       user: user ?? undefined,
     },
   });
+
+  try {
+    await conn.raw('SELECT 1');
+  } catch (err) {
+    throw new Error(`Unable to connect into "${options.host}"`);
+  }
+
+  return conn;
 }
