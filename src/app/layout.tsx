@@ -2,6 +2,7 @@
 
 import ReactBulk, { Box } from '@react-bulk/web';
 
+import CheckUpdate from '@/components/CheckUpdate';
 import Drawer from '@/components/Drawer';
 import Sidebar from '@/components/Sidebar';
 import { ConnectionProvider } from '@/contexts/ConnectionContext';
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </Box>
             </TabsProvider>
           </ConnectionProvider>
+          <CheckUpdate />
         </ReactBulk>
       </body>
     </html>

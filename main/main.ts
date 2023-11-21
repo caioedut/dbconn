@@ -1,5 +1,7 @@
+import { spawn } from 'child_process';
 import { BrowserWindow, app, ipcMain } from 'electron';
 import serve from 'electron-serve';
+import { existsSync, rmSync } from 'fs';
 import path from 'path';
 
 import api from './api';
@@ -54,6 +56,37 @@ const createWindow = () => {
   });
 
   win.setMenuBarVisibility(false);
+
+  win.webContents.session.on('will-download', (_, item) => {
+    // Set the save path, making Electron not to prompt a save dialog.
+    const filePath = `${app.getPath('temp')}\\${item.getFilename()}`;
+    if (existsSync(filePath)) rmSync(filePath);
+
+    item.setSavePath(filePath);
+
+    item.on('updated', (_, state) => {
+      if (state === 'interrupted') {
+        console.log('Download is interrupted but can be resumed');
+      } else if (state === 'progressing') {
+        if (item.isPaused()) {
+          console.log('Download is paused');
+        } else {
+          console.log(`Received bytes: ${item.getReceivedBytes()}`);
+        }
+      }
+    });
+
+    item.once('done', (_, state) => {
+      if (state === 'completed') {
+        console.log('Download successfully');
+
+        // Open Setup
+        spawn('cmd.exe', ['/c', filePath]);
+      } else {
+        console.log(`Download failed: ${state}`);
+      }
+    });
+  });
 
   // Expose URL
   if (isProd) {
