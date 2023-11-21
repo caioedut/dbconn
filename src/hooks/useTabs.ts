@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useStoreState } from 'react-state-hooks';
 
 import { v4 as uuid } from 'uuid';
@@ -42,7 +42,7 @@ export default function useTabs() {
 
       return id;
     },
-    [connection, database],
+    [connection, database, setActive, setTabs],
   );
 
   const close = useCallback(
@@ -56,7 +56,7 @@ export default function useTabs() {
 
       setTabs((current) => current.filter((item) => item.id !== tabId));
     },
-    [active, tabs],
+    [active, setActive, setTabs, tabs],
   );
 
   const setProp = useCallback(
@@ -68,7 +68,7 @@ export default function useTabs() {
         setTabs((current) => [...current]);
       }
     },
-    [tabs],
+    [setTabs, tabs],
   );
 
   const setTitle = useCallback(
@@ -97,7 +97,7 @@ export default function useTabs() {
       const tabId = tabs[index]?.id;
       tabId && setActive(tabId);
     },
-    [tabs],
+    [setActive, tabs],
   );
 
   const goToNext = useCallback(() => {
@@ -124,6 +124,6 @@ export default function useTabs() {
       setTitle,
       tabs,
     }),
-    [active, add, close, goTo, goToNext, goToPrev, setConnection, setDatabase, setTitle, tabs],
+    [active, add, close, goTo, goToNext, goToPrev, setActive, setConnection, setDatabase, setTitle, tabs],
   );
 }

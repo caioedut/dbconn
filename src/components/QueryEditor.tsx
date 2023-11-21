@@ -65,7 +65,7 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
     }
 
     setIsLoading(false);
-  }, [connection?.id]);
+  }, [connection?.id, toaster]);
 
   const handleKeyDown = useCallback(
     (e: any) => {
@@ -104,6 +104,8 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
         sendQuery();
       }
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorRef]);
 
   return (

@@ -27,7 +27,7 @@ export default function useDatabaseList({ connection }: UseDatabaseListProps) {
       ...current,
       [connection.id]: data,
     }));
-  }, [connection, data]);
+  }, [connection, data, setCache]);
 
   return { data, ...rest };
 }

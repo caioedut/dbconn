@@ -1,9 +1,3 @@
-import qs from 'qs';
-
-export function queryString(params = {}, options = {}) {
-  return qs.stringify(parseParams(params), { arrayFormat: 'brackets', ...options });
-}
-
 export function parseParams(data = {}) {
   const result = {};
 

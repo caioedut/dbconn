@@ -26,6 +26,7 @@ export default function Sidebar() {
   ];
 
   links.forEach(({ url }, index) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useHotkey({
       callback: () => router.push(url),
       key: `F${index + 1}`,

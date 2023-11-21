@@ -38,7 +38,7 @@ function TableListItem({ rawStyle, style, table }: TableListItemProps) {
         toaster.error(getError(err));
       }
     },
-    [add, connection?.id],
+    [add, connection?.id, toaster],
   );
 
   return (

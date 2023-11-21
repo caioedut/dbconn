@@ -66,6 +66,7 @@ export default function Page() {
   });
 
   for (let i = 0; i < 10; i++) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useHotkey({
       callback: () => goTo(i),
       ctrl: true,

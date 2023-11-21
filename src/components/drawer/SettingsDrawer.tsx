@@ -1,7 +1,5 @@
 import { memo } from 'react';
 
-import { Box } from '@react-bulk/web';
-
 import List from '@/components/List';
 import { t } from '@/helpers/translate.helper';
 import useSettings from '@/hooks/useSettings';

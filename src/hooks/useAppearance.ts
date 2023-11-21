@@ -17,10 +17,13 @@ export default function useAppearance() {
   // @ts-expect-error
   const [themeId, _setThemeId] = useStoreState<keyof typeof themes>(themeIdKey, getCookie(themeIdKey) || 'dark');
 
-  const setThemeId = useCallback((themeId: keyof typeof themes) => {
-    _setThemeId(themeId);
-    setCookie(themeIdKey, themeId);
-  }, []);
+  const setThemeId = useCallback(
+    (themeId: keyof typeof themes) => {
+      _setThemeId(themeId);
+      setCookie(themeIdKey, themeId);
+    },
+    [_setThemeId],
+  );
 
   const theme = useMemo(() => themes[themeId], [themeId]);
 

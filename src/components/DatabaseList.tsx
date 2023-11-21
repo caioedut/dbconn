@@ -16,17 +16,14 @@ export type DatabaseListItemProps = {
 export default function DatabaseList({ connection }: DatabaseListItemProps) {
   const toaster = useToaster();
 
-  // const { connection, database, setConnection, setDatabase } = useConnection();
   const { database, setConnection, setDatabase } = useConnection();
 
   const isConnected = Boolean(connection.connected);
 
-  const {
-    data: databases,
-    error: errorDatabases,
-    isValidating: isValidatingDatabases,
-    mutate: mutateDatabases,
-  } = useApiOnce<Database[]>(isConnected && '/connections/databases', connection.id);
+  const { data: databases, error: errorDatabases } = useApiOnce<Database[]>(
+    isConnected && '/connections/databases',
+    connection.id,
+  );
 
   const handleSelectDatabase = async (e: Event, db: Database) => {
     e.stopPropagation();
