@@ -32,6 +32,7 @@ const tokens = {
     Results: 'Resultados',
     Rows: 'Linhas',
     Save: 'Salvar',
+    Search: 'Buscar',
     Selected: 'Selecionado',
     Server: 'Servidor',
     Settings: 'Ajustes',
