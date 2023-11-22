@@ -29,7 +29,7 @@ app.whenReady().then(() => {
   const main = new BrowserWindow({
     show: false,
     webPreferences: {
-      contextIsolation: true,
+      backgroundThrottling: false,
       devTools: !isProd,
       preload: path.join(__dirname, 'preload.js'),
     },
@@ -74,7 +74,10 @@ app.whenReady().then(() => {
   });
 
   main.webContents.on('did-finish-load', () => {
-    splash.close();
+    if (!splash.isDestroyed()) {
+      splash.destroy();
+    }
+
     main.maximize();
     main.show();
   });
