@@ -74,21 +74,20 @@
     "typescript": "^5.2.2"
   },
   "build": {
-    "appId": "dbconn",
+    "appId": "com.caioedut.dbconn",
     "productName": "DbConn",
+    "copyright": "Copyright © CaioEduT",
     "win": {
+      "icon": "./resources/icon.png",
       "target": [
         "nsis"
       ]
     },
     "nsis": {
-      "oneClick": false,
-      "perMachine": true,
-      "allowToChangeInstallationDirectory": true,
-      "uninstallDisplayName": "DbConn",
-      "license": "license.md"
+      "oneClick": true
     },
     "mac": {
+      "icon": "./resources/icon.png",
       "category": "your.app.category.type",
       "target": [
         "dmg"
@@ -96,6 +95,9 @@
     },
     "dmg": {
       "title": "Mac Installer"
+    },
+    "linux": {
+      "icon": "./resources/icon.png"
     }
   }
 }

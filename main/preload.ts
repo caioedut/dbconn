@@ -1,9 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
-export const electronAPI = {
-  setTitle: (title: string) => ipcRenderer.send('set-title', title),
-};
-
 function create(method: 'DELETE' | 'GET' | 'POST' | 'PUT') {
   return async (route: string, ...args: any[]) => {
     return new Promise((resolve, reject) => {
@@ -35,5 +31,4 @@ const api = {
   put: create('PUT'),
 };
 
-contextBridge.exposeInMainWorld('electronAPI', electronAPI);
 contextBridge.exposeInMainWorld('api', api);

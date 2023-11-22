@@ -8,56 +8,41 @@ import api from './api';
 
 const isProd = process.env.NODE_ENV !== 'development';
 
-function handleSetTitle(event: any, title: string) {
-  const webContents = event.sender;
-  const win = BrowserWindow.fromWebContents(webContents);
-  if (win !== null) {
-    win.setTitle(title);
-  }
-}
-
-// Loading Screen
-let splash: BrowserWindow | null;
-const createSplashScreen = () => {
-  /// create a browser window
-  splash = new BrowserWindow(
-    Object.assign({
-      /// remove the window frame, so it will become a frameless window
-      frame: false,
-      height: 100,
-      width: 200,
-    }),
-  );
-  splash.setResizable(false);
-  splash.loadURL('file://' + __dirname + '/../splash.html');
-  splash.on('closed', () => (splash = null));
-  splash.webContents.on('did-finish-load', () => {
-    if (splash) {
-      splash.show();
-    }
-  });
-};
-
 if (isProd) {
   serve({ directory: 'out' });
 } else {
   app.setPath('userData', `${app.getPath('userData')} (development)`);
 }
 
-const createWindow = () => {
-  const win = new BrowserWindow({
+app.whenReady().then(() => {
+  const splash = new BrowserWindow({
+    frame: false,
+    height: 180,
+    transparent: true,
+    width: 240,
+  });
+
+  splash.setMenu(null);
+  splash.setResizable(false);
+  splash.loadURL('file://' + __dirname + '/../splash.html');
+
+  const main = new BrowserWindow({
     show: false,
     webPreferences: {
+      contextIsolation: true,
       devTools: !isProd,
       preload: path.join(__dirname, 'preload.js'),
-      // nodeIntegration: true,
-      // contextIsolation: false,
     },
   });
 
-  win.setMenuBarVisibility(false);
+  main.setMenu(null);
+  main.loadURL(isProd ? 'app://./home.html' : `http://localhost:3000/`);
 
-  win.webContents.session.on('will-download', (_, item) => {
+  if (!isProd) {
+    main.webContents.openDevTools();
+  }
+
+  main.webContents.session.on('will-download', (_, item) => {
     // Set the save path, making Electron not to prompt a save dialog.
     const filePath = `${app.getPath('temp')}\\${item.getFilename()}`;
     if (existsSync(filePath)) rmSync(filePath);
@@ -88,38 +73,10 @@ const createWindow = () => {
     });
   });
 
-  // Expose URL
-  if (isProd) {
-    win.loadURL('app://./home.html');
-  } else {
-    // const port = process.argv[2];
-    win.loadURL('http://localhost:3000/');
-  }
-
-  win.webContents.openDevTools();
-
-  win.webContents.on('did-finish-load', () => {
-    /// then close the loading screen window and show the main window
-    if (splash) {
-      splash.close();
-    }
-    win.maximize();
-    win.show();
-  });
-};
-
-app.whenReady().then(() => {
-  ipcMain.on('set-title', handleSetTitle);
-
-  createSplashScreen();
-
-  // createWindow();
-  setTimeout(() => {
-    createWindow();
-  }, 2000);
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  main.webContents.on('did-finish-load', () => {
+    splash.close();
+    main.maximize();
+    main.show();
   });
 });
 
