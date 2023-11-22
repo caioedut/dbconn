@@ -60,7 +60,7 @@ function TableList() {
           return true;
         }
 
-        return [table.schema, table.name].filter(Boolean).join('.').includes(search);
+        return [table.schema, table.name].filter(Boolean).join('.').toLowerCase().includes(search.toLowerCase());
       }),
     [tables, tab, deferredSearch],
   );
