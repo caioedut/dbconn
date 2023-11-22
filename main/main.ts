@@ -24,7 +24,7 @@ app.whenReady().then(() => {
 
   splash.setMenu(null);
   splash.setResizable(false);
-  splash.loadURL('file://' + __dirname + '/../splash.html');
+  splash.loadURL('file://' + __dirname + '/../splash/index.html');
 
   const main = new BrowserWindow({
     show: false,

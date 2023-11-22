@@ -1,0 +1,48 @@
+<main>
+  <img src="logo.svg" alt="Logo"/>
+  <img class="detail" src="detail.svg" alt="Detail"/>
+</main>
+
+<style>
+  html, body {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  main {
+    position: fixed;
+    inset: 0;
+  }
+
+  img {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+  }
+
+  .detail {
+    position: absolute;
+    inset: 0;
+    animation: pulse 1s ease infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      rotate: 0;
+    }
+
+    25% {
+      rotate: 380deg;
+    }
+
+    40% {
+      rotate: 360deg;
+    }
+
+    100% {
+      rotate: 360deg;
+    }
+  }
+</style>
