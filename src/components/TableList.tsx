@@ -76,41 +76,43 @@ function TableList() {
       }
       title={t('Structs')}
     >
-      <State error={errorTables}>
-        <Box center p={2}>
-          <Tabs
-            size="small"
-            tabs={[
-              { title: displayTablesHk.title, label: t('Tables'), value: 'table' },
-              { title: displayViewsHk.title, label: t('Views'), value: 'view' },
-            ]}
-            value={tab}
-            variant="nav"
-            onChange={(_, value: any) => setTab(value)}
-          />
-        </Box>
+      {Boolean(tables) && (
+        <State error={errorTables}>
+          <Box center p={2}>
+            <Tabs
+              size="small"
+              tabs={[
+                { title: displayTablesHk.title, label: t('Tables'), value: 'table' },
+                { title: displayViewsHk.title, label: t('Views'), value: 'view' },
+              ]}
+              value={tab}
+              variant="nav"
+              onChange={(_, value: any) => setTab(value)}
+            />
+          </Box>
 
-        <Box p={2} pt={0}>
-          <Input placeholder={`${t('Search')}...`} size="small" value={search} onChange={handleSearch} />
-        </Box>
+          <Box p={2} pt={0}>
+            <Input placeholder={`${t('Search')}...`} size="small" value={search} onChange={handleSearch} />
+          </Box>
 
-        <Box flex>
-          <AutoSizer>
-            {({ height, width }) => (
-              <List
-                className="rbk-scroll-bar"
-                height={height}
-                rowCount={filteredTables?.length || 0}
-                rowHeight={26}
-                rowRenderer={({ index, key, style }) => (
-                  <TableListItem key={key} rawStyle={style} table={filteredTables[index]} />
-                )}
-                width={width}
-              />
-            )}
-          </AutoSizer>
-        </Box>
-      </State>
+          <Box flex>
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  className="rbk-scroll-bar"
+                  height={height}
+                  rowCount={filteredTables?.length || 0}
+                  rowHeight={26}
+                  rowRenderer={({ index, key, style }) => (
+                    <TableListItem key={key} rawStyle={style} table={filteredTables[index]} />
+                  )}
+                  width={width}
+                />
+              )}
+            </AutoSizer>
+          </Box>
+        </State>
+      )}
     </Panel>
   );
 }
