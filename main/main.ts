@@ -29,7 +29,7 @@ const createSplashScreen = () => {
     }),
   );
   splash.setResizable(false);
-  splash.loadURL('file://' + __dirname + '/../splash/index.html');
+  splash.loadURL('file://' + __dirname + '/../splash.html');
   splash.on('closed', () => (splash = null));
   splash.webContents.on('did-finish-load', () => {
     if (splash) {
