@@ -1,4 +1,4 @@
-import { memo, startTransition, useCallback, useDeferredValue, useMemo, useState } from 'react';
+import { memo, startTransition, useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import { AutoSizer, List } from 'react-virtualized';
 
 import { RbkInputEvent } from '@react-bulk/core';
@@ -18,6 +18,8 @@ import { Table } from '@/types/database.type';
 function TableList() {
   const { connection, database } = useConnection();
 
+  const searchRef = useRef<HTMLInputElement>();
+
   const [tab, setTab] = useState<'table' | 'view'>('table');
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
@@ -34,6 +36,12 @@ function TableList() {
       setSearch(value);
     });
   }, []);
+
+  const searchTablesHk = useHotkey({
+    callback: () => searchRef.current?.focus(),
+    ctrl: true,
+    key: 'f',
+  });
 
   const displayTablesHk = useHotkey({
     callback: () => setTab('table'),
@@ -92,7 +100,13 @@ function TableList() {
           </Box>
 
           <Box p={2} pt={0}>
-            <Input placeholder={`${t('Search')}...`} size="small" value={search} onChange={handleSearch} />
+            <Input
+              ref={searchRef}
+              placeholder={`${t('Search')}... ${searchTablesHk.title}`}
+              size="small"
+              value={search}
+              onChange={handleSearch}
+            />
           </Box>
 
           <Box flex>

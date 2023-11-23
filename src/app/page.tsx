@@ -17,6 +17,12 @@ export default function Page() {
 
   const scrollRef = useRef<HTMLDivElement>();
 
+  function addQueryEditorTab() {
+    add({
+      render: ({ id }) => <QueryEditor tabId={id} />,
+    });
+  }
+
   const handleScrollTabs = (e: MouseEvent) => {
     // @ts-expect-error
     scrollRef.current?.scrollBy(e.deltaY, 0);
@@ -25,7 +31,7 @@ export default function Page() {
   const handleAddTab = (e: MouseEvent) => {
     e.stopPropagation();
 
-    add();
+    addQueryEditorTab();
   };
 
   const handlePressTab = (e: MouseEvent, tabId: string) => {
@@ -54,7 +60,7 @@ export default function Page() {
   }, [tabs, active]);
 
   const newTabHk = useHotkey({
-    callback: () => add(),
+    callback: () => addQueryEditorTab(),
     ctrl: true,
     key: 't',
   });
@@ -94,9 +100,7 @@ export default function Page() {
           {tabs.map((tab) => {
             const isActive = active === tab.id;
             const textColor = theme.contrast(isActive ? 'primary' : 'background');
-            const title = `${(tab?.connection?.name || tab?.connection?.host) ?? '-----'} /// ${
-              tab?.database?.name ?? '-----'
-            } /// ${tab?.connection?.user ?? '-----'}`;
+            const title = tab.title || t('New Tab');
 
             return (
               <Box
@@ -145,12 +149,12 @@ export default function Page() {
         </Scrollable>
       </Box>
 
-      {tabs.map((tab) => {
+      {tabs.map(({ render, ...tab }) => {
         const isActive = active === tab.id;
 
         return (
           <Box key={tab.id} flex hidden={!isActive}>
-            <QueryEditor tab={tab} {...tab.props} />
+            {render(tab)}
           </Box>
         );
       })}

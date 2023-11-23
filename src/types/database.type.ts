@@ -1,3 +1,19 @@
+export type Result = {
+  fields: {
+    name: string;
+    type: string;
+  }[];
+  rows: any[];
+};
+
+export type QueryError = {
+  code: number | string;
+  error: true;
+  message: string;
+  state: string;
+  symbol: string;
+};
+
 export type Connection = {
   connected?: boolean;
   database: string;
@@ -20,18 +36,9 @@ export type Table = {
   type: 'function' | 'procedure' | 'table' | 'view';
 };
 
-export type Result = {
-  fields: {
-    name: string;
-    type: string;
-  }[];
-  rows: any[];
-};
-
-export type QueryError = {
-  code: number | string;
-  error: true;
-  message: string;
-  state: string;
-  symbol: string;
+export type Column = {
+  default: unknown;
+  name: string;
+  nullable: boolean;
+  type: string;
 };

@@ -11,39 +11,41 @@ import { highlight } from 'sql-highlight';
 
 import Panel from '@/components/Panel';
 import QueryResults from '@/components/QueryResults';
-import { Tab } from '@/contexts/TabsContext';
 import { RobotoMonoFont } from '@/fonts';
 import { getError } from '@/helpers/api.helper';
 import { restoreSelection, saveSelection } from '@/helpers/selection.helper';
 import useConnection from '@/hooks/useConnection';
 import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
-import { QueryError, Result } from '@/types/database.type';
+import { Connection, Database, QueryError, Result } from '@/types/database.type';
 
 export type QueryEditorProps = {
   autoRun?: boolean;
   sql?: string;
-  tab: Tab;
+  tabId: string;
 };
 
 const parseHTML = (text: string) => {
   return highlight(text, { html: true }).replace(/\n/g, '<br>');
 };
 
-function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
+function QueryEditor({ autoRun, sql, tabId }: QueryEditorProps) {
   const toaster = useToaster();
   const connectionContext = useConnection();
-  const { setConnection, setDatabase } = useTabs();
+  const { setTitle } = useTabs();
 
-  const connection = useMemo(
-    () => tab?.connection ?? connectionContext.connection,
-    [tab?.connection, connectionContext.connection],
-  );
+  const [connection, setConnection] = useState<Connection | undefined>(connectionContext.connection);
+  const [database, setDatabase] = useState<Database | undefined>(connectionContext.database);
 
-  const database = useMemo(
-    () => tab?.database ?? connectionContext.database,
-    [tab?.database, connectionContext.database],
-  );
+  // const connection = useMemo(
+  //   () => tab?.connection ?? connectionContext.connection,
+  //   [tab?.connection, connectionContext.connection],
+  // );
+  //
+  // const database = useMemo(
+  //   () => tab?.database ?? connectionContext.database,
+  //   [tab?.database, connectionContext.database],
+  // );
 
   const editorRef = useRef<HTMLDivElement>();
 
@@ -89,12 +91,24 @@ function QueryEditor({ autoRun, sql, tab }: QueryEditorProps) {
   }, []);
 
   useEffect(() => {
-    setConnection(tab.id, connection);
-  }, [tab.id, connection, setConnection]);
+    if (!connection) {
+      setConnection(connectionContext.connection);
+    }
+  }, [connectionContext.connection, connection]);
 
   useEffect(() => {
-    setDatabase(tab.id, database);
-  }, [tab.id, database, setDatabase]);
+    if (!database) {
+      setDatabase(connectionContext.database);
+    }
+  }, [connectionContext.database, database]);
+
+  useEffect(() => {
+    const title = `${(connection?.name || connection?.host) ?? '-----'} /// ${database?.name ?? '-----'} /// ${
+      connection?.user ?? '-----'
+    }`;
+
+    setTitle(tabId, title);
+  }, [tabId, setTitle, connection, database]);
 
   useEffect(() => {
     if (editorRef) {

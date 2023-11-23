@@ -1,48 +1,37 @@
 import { useCallback, useMemo } from 'react';
 import { useStoreState } from 'react-state-hooks';
 
+import { ReactElement } from '@react-bulk/core';
 import { v4 as uuid } from 'uuid';
 
-import { QueryEditorProps } from '@/components/QueryEditor';
-import useConnection from '@/hooks/useConnection';
-import { Connection, Database } from '@/types/database.type';
+import QueryEditor from '@/components/QueryEditor';
 
 export type Tab = {
-  connection?: Connection;
-  database?: Database;
   id: string;
-  props?: Omit<QueryEditorProps, 'tab'>;
+  render: (props: Omit<Tab, 'render'>) => ReactElement;
   title?: string;
 };
 
 export default function useTabs() {
-  const { connection, database } = useConnection();
-
-  const [tabs, setTabs] = useStoreState<Tab[]>('tabs', [{ id: '0', connection, database }]);
-
   const [active, setActive] = useStoreState<string>('tabs.active', '0');
 
+  const [tabs, setTabs] = useStoreState<Tab[]>('tabs', [
+    {
+      id: '0',
+      render: () => <QueryEditor tabId="0" />,
+    },
+  ]);
+
   const add = useCallback(
-    (tab?: Partial<Omit<Tab, 'id'>>) => {
+    (tab: Partial<Omit<Tab, 'id'>>) => {
       const id = uuid();
 
-      setTabs((current) => {
-        return [
-          ...current,
-          {
-            connection: tab?.connection ?? connection,
-            database: tab?.database ?? database,
-            ...tab,
-            id,
-          },
-        ];
-      });
-
       setActive(id);
+      setTabs((current) => [...current, { ...tab, id } as Tab]);
 
       return id;
     },
-    [connection, database, setActive, setTabs],
+    [setActive, setTabs],
   );
 
   const close = useCallback(
@@ -78,20 +67,6 @@ export default function useTabs() {
     [setProp],
   );
 
-  const setConnection = useCallback(
-    (tabId: string, connection?: Connection) => {
-      setProp(tabId, 'connection', connection);
-    },
-    [setProp],
-  );
-
-  const setDatabase = useCallback(
-    (tabId: string, database?: Database) => {
-      setProp(tabId, 'database', database);
-    },
-    [setProp],
-  );
-
   const goTo = useCallback(
     (index: number) => {
       const tabId = tabs[index]?.id;
@@ -119,11 +94,9 @@ export default function useTabs() {
       goToNext,
       goToPrev,
       setActive,
-      setConnection,
-      setDatabase,
       setTitle,
       tabs,
     }),
-    [active, add, close, goTo, goToNext, goToPrev, setActive, setConnection, setDatabase, setTitle, tabs],
+    [active, add, close, goTo, goToNext, goToPrev, setActive, setTitle, tabs],
   );
 }
