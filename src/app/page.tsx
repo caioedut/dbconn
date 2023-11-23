@@ -17,8 +17,11 @@ export default function Page() {
 
   const scrollRef = useRef<HTMLDivElement>();
 
+  const tabsHeight = 36;
+
   function addQueryEditorTab() {
     add({
+      icon: 'File',
       render: ({ id }) => <QueryEditor tabId={id} />,
     });
   }
@@ -95,7 +98,7 @@ export default function Page() {
 
   return (
     <>
-      <Box noWrap row border="1px solid primary">
+      <Box noWrap row h={tabsHeight}>
         <Scrollable ref={scrollRef} direction="horizontal" onWheel={handleScrollTabs}>
           {tabs.map((tab) => {
             const isActive = active === tab.id;
@@ -115,6 +118,11 @@ export default function Page() {
                 onPressIn={(e: MouseEvent) => handlePressInTab(e, tab.id)}
               >
                 <Box center flex noWrap row maxw={200}>
+                  {tab.icon && (
+                    <Box mr={2}>
+                      <Icon color={isActive ? 'contrast' : 'primary'} name={tab.icon} />
+                    </Box>
+                  )}
                   <Text flex color={textColor} numberOfLines={1} variant="secondary">
                     {title}
                   </Text>
@@ -153,7 +161,7 @@ export default function Page() {
         const isActive = active === tab.id;
 
         return (
-          <Box key={tab.id} flex hidden={!isActive}>
+          <Box key={tab.id} h={`calc(100% - ${tabsHeight}px)`} hidden={!isActive}>
             {render(tab)}
           </Box>
         );

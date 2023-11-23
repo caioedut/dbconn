@@ -124,7 +124,7 @@ function QueryEditor({ autoRun, sql, tabId }: QueryEditorProps) {
 
   return (
     <>
-      <ResizablePanelGroup autoSaveId="example" direction="vertical">
+      <ResizablePanelGroup direction="vertical">
         <ResizablePanel minSizePixels={32} order={1}>
           <Panel h="100%" loading={isLoading}>
             <Scrollable>

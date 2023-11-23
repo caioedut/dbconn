@@ -1,8 +1,5 @@
 export type Result = {
-  fields: {
-    name: string;
-    type: string;
-  }[];
+  fields: Column[];
   rows: any[];
 };
 
@@ -31,14 +28,18 @@ export type Database = {
 };
 
 export type Table = {
+  fullName: string;
   name: string;
   schema: string;
   type: 'function' | 'procedure' | 'table' | 'view';
 };
 
 export type Column = {
-  default: unknown;
+  defaultValue: unknown;
+  maxLength: null | number;
   name: string;
   nullable: boolean;
+  numericPrecision: null | number;
+  numericScale: null | number;
   type: string;
 };

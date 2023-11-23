@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Box m={1} w={320}>
                   <Drawer />
                 </Box>
-                <Box flex m={1} ml={0}>
+                <Box flex m={1} ml={0} overflow="hidden">
                   {children}
                 </Box>
               </Box>

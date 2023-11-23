@@ -18,6 +18,7 @@ export default async function getTables(conn: ConnRef) {
   return orderBy(
     result.rows.map((row: any) => ({
       name: row.tbname,
+      fullName: [row.tbschema, row.tbname].filter(Boolean).join('.'),
       schema: row.tbschema ?? null,
       type:
         row.tbtype

@@ -8,6 +8,7 @@ const tokens = {
     Appearance: 'Aparência',
     Cancel: 'Cancelar',
     Close: 'Fechar',
+    Columns: 'Colunas',
     'Confirm Password': 'Confirmação de Senha',
     Connect: 'Conectar',
     Connected: 'Conectado',

@@ -35,6 +35,7 @@ function TableListItem({ rawStyle, style, table }: TableListItemProps) {
         const response = await api.get('/query/topQuery', connection?.id, tableTitle, limit);
 
         add({
+          icon: 'File',
           render: ({ id }) => <QueryEditor autoRun sql={response.data} tabId={id} />,
         });
       } catch (err) {
@@ -47,6 +48,7 @@ function TableListItem({ rawStyle, style, table }: TableListItemProps) {
   const handleTableDetails = useCallback(() => {
     add({
       title: table.name,
+      icon: 'Table',
       render: () => <TableDetails connection={connection} table={table} />,
     });
   }, [add, connection, table]);

@@ -7,6 +7,7 @@ import { v4 as uuid } from 'uuid';
 import QueryEditor from '@/components/QueryEditor';
 
 export type Tab = {
+  icon?: string;
   id: string;
   render: (props: Omit<Tab, 'render'>) => ReactElement;
   title?: string;
@@ -18,6 +19,8 @@ export default function useTabs() {
   const [tabs, setTabs] = useStoreState<Tab[]>('tabs', [
     {
       id: '0',
+      title: 'Query',
+      icon: 'File',
       render: () => <QueryEditor tabId="0" />,
     },
   ]);
