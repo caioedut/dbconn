@@ -7,7 +7,7 @@ import {
 import { useObjectState } from 'react-state-hooks';
 
 import { AnyObject, FormRef, RbkFormEvent, useToaster } from '@react-bulk/core';
-import { Animation, Box, Button, Drawer, Form, Grid, Input, Scrollable, Select, Text } from '@react-bulk/web';
+import { Animation, Box, Button, Drawer, Form, Grid, Input, Modal, Scrollable, Select, Text } from '@react-bulk/web';
 import * as yup from 'yup';
 
 import DatabaseList from '@/components/DatabaseList';
@@ -32,6 +32,8 @@ function ConnectionsDrawer() {
   const formConnectionRef = useRef<FormRef>();
 
   const [isConnecting, updateIsConnecting] = useObjectState<{ [key: string]: boolean }>({});
+
+  const [changePasswordConn, setChangePasswordConn] = useState<Connection>();
 
   const [editModel, setEditModel] = useState<Partial<Connection>>();
 
@@ -121,7 +123,14 @@ function ConnectionsDrawer() {
         await api.post('/connections/connect', conn.id);
         await mutateConnections();
       } catch (err) {
-        toaster.error(getError(err));
+        const isPasswordExpired =
+          (err as Error)?.message?.includes('password') && (err as Error)?.message?.includes('expired');
+
+        if (!isPasswordExpired) {
+          toaster.error(getError(err));
+        } else {
+          setChangePasswordConn(conn);
+        }
       }
 
       updateIsConnecting({ [conn.id]: false });
@@ -145,6 +154,28 @@ function ConnectionsDrawer() {
 
     setConnection(undefined);
     setDatabase(undefined);
+  };
+
+  const handleSubmitPassword = async (e: RbkFormEvent, data: AnyObject) => {
+    const errors = await validate(data, {
+      confirmPassword: yup
+        .string()
+        .required()
+        .oneOf([yup.ref('password')]),
+      password: yup.string().required(),
+    });
+
+    e.form.setErrors(errors);
+    if (errors) return;
+
+    try {
+      await api.post('/users/password', changePasswordConn?.id, data.password);
+      await mutateConnections();
+    } catch (err) {
+      toaster.error(getError(err));
+    }
+
+    setChangePasswordConn(undefined);
   };
 
   const newConnHk = useHotkey({
@@ -282,7 +313,7 @@ function ConnectionsDrawer() {
                     { label: 'MySQL', value: 'mysql' },
                     { label: 'PostgreSQL', value: 'pg' },
                     { label: 'Microsoft SQL Server', value: 'mssql' },
-                    { label: 'Oracle', value: 'oracledb' },
+                    // { label: 'Oracle', value: 'oracledb' },
                   ]}
                   value={editModel?.type}
                   onChange={(_, value) => handleChangeType(value)}
@@ -344,6 +375,33 @@ function ConnectionsDrawer() {
           </Box>
         </Form>
       </Drawer>
+
+      <Modal visible={Boolean(changePasswordConn)}>
+        <Form onCancel={() => setChangePasswordConn(undefined)} onSubmit={handleSubmitPassword}>
+          <Scrollable contentInset={4} maxw="100%" w={400}>
+            <Grid gap>
+              <Box xs={12}>
+                <Input label={t('Password *')} name="password" value={changePasswordConn?.password} />
+              </Box>
+              <Box xs={12}>
+                <Input label={t('Confirm Password *')} name="confirmPassword" value={changePasswordConn?.password} />
+              </Box>
+            </Grid>
+          </Scrollable>
+          <Box bg="background.secondary" m={-4} mt={4} p={4}>
+            <Grid gap>
+              <Box xs>
+                <Button type="cancel" variant="outline">
+                  {t('Cancel')}
+                </Button>
+              </Box>
+              <Box xs>
+                <Button type="submit">{t('Save Password')}</Button>
+              </Box>
+            </Grid>
+          </Box>
+        </Form>
+      </Modal>
     </>
   );
 }
