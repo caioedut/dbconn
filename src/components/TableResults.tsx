@@ -38,7 +38,7 @@ export default function TableResults({ fields, rows }: TableResultsProps) {
 
   const thStyle = {
     '&:first-child': { zIndex: 1 },
-    bg: 'background',
+    bg: 'background.secondary',
     fontSize: 12,
     fontWeight: 'bold',
     letterSpacing: 0.5,

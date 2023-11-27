@@ -76,6 +76,8 @@ module.exports = {
 
     radix: ['warn', 'as-needed'],
 
+    'react/jsx-curly-brace-presence': ['error', 'never'],
+
     'react/jsx-no-target-blank': 'off',
 
     'react/jsx-uses-react': 'off',
