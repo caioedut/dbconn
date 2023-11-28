@@ -1,20 +1,24 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   Panel as ResizablePanel,
   PanelGroup as ResizablePanelGroup,
   PanelResizeHandle as ResizablePanelHandle,
 } from 'react-resizable-panels';
 
-import { useToaster } from '@react-bulk/core';
-import { Box, Scrollable } from '@react-bulk/web';
+import { sleep, useToaster } from '@react-bulk/core';
+import { Box, Card, Scrollable, Text } from '@react-bulk/web';
+import { offset } from 'caret-pos';
 import { highlight } from 'sql-highlight';
 
+import Overable from '@/components/Overable';
 import Panel from '@/components/Panel';
 import QueryResults from '@/components/QueryResults';
+import { CONTEXT, PRIMARY } from '@/constants/SQL';
 import { RobotoMonoFont } from '@/fonts';
 import { getError } from '@/helpers/api.helper';
-import { restoreSelection, saveSelection } from '@/helpers/selection.helper';
+import { insertAtSelection } from '@/helpers/selection.helper';
 import useConnection from '@/hooks/useConnection';
+import useTables from '@/hooks/useTables';
 import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
 import { Connection, Database, QueryError, Result } from '@/types/database.type';
@@ -29,13 +33,55 @@ const parseHTML = (text: string) => {
   return highlight(text, { html: true }).replace(/\n/g, '<br>');
 };
 
-function QueryEditor({ autoRun, sql, tabId }: QueryEditorProps) {
+const sqlToAst = (sql: string) => {
+  const froms: { alias: null | string; table: string }[] = [];
+
+  const regex = new RegExp(PRIMARY.join('|'), 'ig');
+  const splitted = sql
+    .replace(regex, (substr) => `$///$${substr}`.toUpperCase().trim())
+    .split('$///$')
+    .filter(Boolean);
+
+  for (const cmd of splitted) {
+    if (cmd.startsWith('FROM')) {
+      froms.push(
+        ...cmd
+          .replace('FROM', '')
+          .split(',')
+          .filter((item) => item.trim())
+          .map((item) => {
+            const matches = item.trim().matchAll(/(\w+)(\sAS\s)?(\w+)?/gi);
+            const match = matches?.next();
+
+            const table = match?.value?.[1] ?? null;
+            const alias = match?.value?.[3] ?? null;
+
+            return { alias, table };
+          }),
+      );
+    }
+  }
+
+  const type = (sql.trim().split(/\s/).at(0) || 'UNKNOWN').toUpperCase();
+
+  return { froms, type };
+};
+
+function QueryEditor({ autoRun, sql = 'SELECT TOP 10 * FROM Pessoa AS pe WHERE pe.', tabId }: QueryEditorProps) {
   const toaster = useToaster();
   const connectionContext = useConnection();
   const { setTitle } = useTabs();
 
   const [connection, setConnection] = useState<Connection | undefined>(connectionContext.connection);
   const [database, setDatabase] = useState<Database | undefined>(connectionContext.database);
+
+  const { getColumns, tables } = useTables(connection, database);
+
+  const acSelectedRef = useRef<HTMLDivElement>();
+  // const [acVisible, setAcVisible] = useState(false);
+  const [acIndex, setAcIndex] = useState(-1);
+  const [acItems, setAcItems] = useState<string[] | string[][]>([]);
+  const [acPositions, setAcPositions] = useState<{ left: number; top: number } | null>(null);
 
   // const connection = useMemo(
   //   () => tab?.connection ?? connectionContext.connection,
@@ -69,13 +115,179 @@ function QueryEditor({ autoRun, sql, tabId }: QueryEditorProps) {
     setIsLoading(false);
   }, [connection?.id, toaster]);
 
+  const showAutocomplete = useCallback(() => {
+    const { height, left, top } = offset(editorRef.current as Element);
+
+    setAcPositions({ left, top: top + height });
+
+    acSelectedRef?.current?.scrollIntoView({
+      block: 'nearest',
+      inline: 'nearest',
+    });
+  }, []);
+
+  const autocomplete = useCallback(async () => {
+    await sleep(10);
+
+    let caretPosition = 0;
+    const selection = document.getSelection() as Selection;
+    const range = document.createRange();
+
+    if (range.collapsed) {
+      const temp = document.createTextNode('\0');
+      selection.getRangeAt(0).insertNode(temp);
+      caretPosition = editorRef.current!.innerText.indexOf('\0');
+      temp.parentNode!.removeChild(temp);
+
+      range.setStart(selection.focusNode!, selection.focusOffset!);
+      range.collapse(false);
+
+      // e.key === 'Enter'
+      // selection.removeAllRanges();
+      // selection.addRange(range);
+    }
+
+    const text = selection.focusNode?.textContent ?? '';
+    const ast = sqlToAst(text);
+
+    const splitted = text.substring(0, caretPosition).split(/\s/g);
+    // .filter((cmd: string) => cmd.trim());
+
+    const keyword =
+      splitted.filter((cmd: string) => Object.keys(CONTEXT).includes(cmd.toUpperCase().trim())).at(-1) ?? '';
+
+    const context = splitted.at(-1) ?? '';
+
+    let newItems: typeof acItems = CONTEXT?.[context as keyof typeof CONTEXT] ?? [];
+
+    if (connection && database) {
+      const columns: string[] = [];
+
+      // Store Fields
+      for (const from of ast.froms) {
+        try {
+          const data = await getColumns(from.table);
+
+          const withAlias = data.map((item) => [from.alias ?? from.table, item.name].filter(Boolean).join('.'));
+          const withoutAlias = data.map((item) => [item.name].filter(Boolean).join('.'));
+
+          columns.push(...withAlias, ...(!context ? [] : withoutAlias));
+        } catch {}
+      }
+
+      setAcPositions(null);
+
+      // if (keyword === 'FROM' && (!context || context.includes('.'))) {
+      if (keyword === 'FROM' && keyword !== context) {
+        const withAlias = (tables || [])
+          .filter((table) => table.fullName.toUpperCase().startsWith(context.toUpperCase()))
+          .map(({ fullName }) => fullName);
+
+        const withoutAlias = (tables || [])
+          .filter((table) => table.name.toUpperCase().startsWith(context.toUpperCase()))
+          .map(({ name }) => name);
+
+        newItems = [...withAlias, ...(!context ? [] : withoutAlias)].map((table) => [
+          table.substring(context.length),
+          table,
+        ]);
+      }
+
+      // Table/Column
+      if (['SELECT', 'WHERE'].includes(keyword) && keyword !== context) {
+        const columnsFrom = columns.filter((column) => column.toUpperCase().startsWith(context.toUpperCase()));
+
+        if (columnsFrom.length) {
+          newItems = columnsFrom.map((column) => [column.substring(context.length), column]);
+        }
+      }
+
+      // if (keyword === 'SELECT' && !ast.froms.length) {
+      //   newItems = ['*'];
+      // }
+      //
+      // if (['AND', 'OR', 'SELECT', 'WHERE'].includes(keyword ?? '') && ast.froms.length) {
+      //   newItems = columns;
+      // }
+    }
+
+    if (newItems) {
+      showAutocomplete();
+    }
+
+    setAcItems(newItems);
+  }, [connection, database, getColumns, showAutocomplete, tables]);
+
   const handleKeyDown = useCallback(
     (e: any) => {
-      if (e.key === 'F5' || (e.key === 'Enter' && e.ctrlKey)) {
+      const { code, ctrlKey, key } = e;
+
+      let prevent = false;
+
+      if (key === 'F5' || (key === 'Enter' && ctrlKey)) {
+        prevent = true;
         sendQuery().catch(() => null);
       }
+
+      if (code === 'Space' && ctrlKey) {
+        prevent = true;
+      }
+
+      // Autocomplete
+      if (acPositions) {
+        if (key === 'Escape') {
+          prevent = true;
+          setAcPositions(null);
+        }
+
+        if (key === 'Enter') {
+          const acItem = acItems[acIndex];
+
+          if (typeof acItem !== 'undefined') {
+            prevent = true;
+
+            const textToInsert = Array.isArray(acItem) ? acItem[0] : acItem;
+            insertAtSelection(editorRef.current, textToInsert);
+            setAcPositions(null);
+          }
+        }
+
+        let inc = 0;
+
+        if (key === 'ArrowUp') {
+          prevent = true;
+          inc = -1;
+        }
+
+        if (key === 'ArrowDown') {
+          prevent = true;
+          inc = 1;
+        }
+
+        if (inc) {
+          setAcIndex((current) => {
+            let newIndex = current + inc;
+
+            if (newIndex < 0) {
+              newIndex = -1;
+            }
+
+            if (newIndex >= acItems.length) {
+              newIndex = acItems.length - 1;
+            }
+
+            return newIndex;
+          });
+        }
+      }
+
+      if (prevent) {
+        e.preventDefault();
+      }
+
+      autocomplete().catch(() => null);
     },
-    [sendQuery],
+    [acIndex, acItems, acPositions, autocomplete, sendQuery],
   );
 
   const handlePaste = useCallback((e: ClipboardEvent) => {
@@ -83,11 +295,12 @@ function QueryEditor({ autoRun, sql, tabId }: QueryEditorProps) {
     document.execCommand('inserttext', false, e.clipboardData?.getData('text/plain') ?? '');
   }, []);
 
-  const handleChange = useCallback(() => {
-    const $editor = editorRef.current as HTMLDivElement;
-    const selection = saveSelection($editor);
-    editorRef.current!.innerHTML = parseHTML($editor.innerText);
-    restoreSelection($editor, selection);
+  const handleChange = useCallback(async () => {
+    // const $editor = editorRef.current as HTMLDivElement;
+    // const selection = saveSelection($editor);
+    // // TODO: highlight
+    // editorRef.current!.innerHTML = parseHTML($editor.innerText);
+    // restoreSelection($editor, selection);
   }, []);
 
   useEffect(() => {
@@ -111,11 +324,21 @@ function QueryEditor({ autoRun, sql, tabId }: QueryEditorProps) {
   }, [tabId, setTitle, connection, database]);
 
   useEffect(() => {
+    if (!editorRef.current) return;
+
+    // TODO: highlight
+    // editorRef.current.innerHTML = parseHTML(sql ?? '');
+    editorRef.current.innerHTML = sql ?? '';
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editorRef]);
+
+  useEffect(() => {
     if (editorRef) {
       editorRef.current?.focus();
 
       if (autoRun) {
-        sendQuery();
+        sendQuery().catch(() => null);
       }
     }
 
@@ -126,7 +349,7 @@ function QueryEditor({ autoRun, sql, tabId }: QueryEditorProps) {
     <>
       <ResizablePanelGroup direction="vertical">
         <ResizablePanel minSizePixels={32} order={1}>
-          <Panel h="100%" loading={isLoading}>
+          <Panel h="100%" loading={isLoading} position="relative">
             <Scrollable>
               <Box
                 ref={editorRef}
@@ -136,7 +359,7 @@ function QueryEditor({ autoRun, sql, tabId }: QueryEditorProps) {
                 autoCapitalize="none"
                 autoCorrect="off"
                 className={RobotoMonoFont.className}
-                dangerouslySetInnerHTML={{ __html: parseHTML(sql ?? '') }}
+                // dangerouslySetInnerHTML={{ __html: parseHTML(sql ?? '') }}
                 h="100%"
                 p={2}
                 spellCheck={false}
@@ -159,6 +382,36 @@ function QueryEditor({ autoRun, sql, tabId }: QueryEditorProps) {
                 onPaste={handlePaste}
               />
             </Scrollable>
+
+            {Boolean(acPositions && acItems.length) && (
+              <Card
+                bg="background.secondary"
+                border="1px solid primary"
+                p={0}
+                position="fixed"
+                shadow={2}
+                w={200}
+                {...(acPositions ?? {})}
+              >
+                <Scrollable maxh={140}>
+                  {acItems.map((item, index) => (
+                    <Overable
+                      key={index}
+                      ref={index === acIndex ? acSelectedRef : null}
+                      active={index === acIndex}
+                      p={1}
+                    >
+                      <Text variant="secondary">{Array.isArray(item) ? item[1] : item}</Text>
+                    </Overable>
+                  ))}
+                </Scrollable>
+                {(!connection || !database) && (
+                  <Text bg="warning" letterSpacing={1} p={1} variant="caption">
+                    Pick database for best results!
+                  </Text>
+                )}
+              </Card>
+            )}
           </Panel>
         </ResizablePanel>
 
