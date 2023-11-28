@@ -49,9 +49,7 @@ export default function TableDetails({ connection, table }: TableDetailsProps) {
       </Box>
       <Box flex>
         <Panel flex h="100%" ml={1}>
-          <Scrollable style={{ overflow: 'auto' }}>
-            <TableResults fields={columns} rows={rows} />
-          </Scrollable>
+          <TableResults fields={columns} rows={rows} />
         </Panel>
       </Box>
     </Box>

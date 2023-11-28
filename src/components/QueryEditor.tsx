@@ -4,7 +4,6 @@ import {
   PanelGroup as ResizablePanelGroup,
   PanelResizeHandle as ResizablePanelHandle,
 } from 'react-resizable-panels';
-import { List } from 'react-virtualized';
 
 import { sleep, useToaster } from '@react-bulk/core';
 import { Box, Card, Scrollable, Text } from '@react-bulk/web';
@@ -14,6 +13,7 @@ import { highlight } from 'sql-highlight';
 import Overable from '@/components/Overable';
 import Panel from '@/components/Panel';
 import QueryResults from '@/components/QueryResults';
+import VirtualizedList from '@/components/VirtualizedList';
 import { CONTEXT, PRIMARY } from '@/constants/SQL';
 import { RobotoMonoFont } from '@/fonts';
 import { getError } from '@/helpers/api.helper';
@@ -78,6 +78,7 @@ function QueryEditor({ autoRun, sql = 'SELECT TOP 10 * FROM Pessoa AS pe WHERE p
 
   const { getColumns, tables } = useTables(connection, database);
 
+  const acScrollRef = useRef<Element>();
   const acSelectedRef = useRef<HTMLDivElement>();
   // const [acVisible, setAcVisible] = useState(false);
   const [acIndex, setAcIndex] = useState(-1);
@@ -393,28 +394,20 @@ function QueryEditor({ autoRun, sql = 'SELECT TOP 10 * FROM Pessoa AS pe WHERE p
                 shadow={2}
                 {...(acPositions ?? {})}
               >
-                <List
-                  className="rbk-scroll-bar"
-                  height={140}
-                  rowCount={acItems?.length || 0}
-                  rowHeight={22}
-                  rowRenderer={({ index, key, style }) => {
-                    const item = acItems[index];
-
-                    return (
+                <Scrollable ref={acScrollRef} h={140} w={200}>
+                  <VirtualizedList rowHeight={22} scrollViewRef={acScrollRef}>
+                    {acItems?.map((item, index) => (
                       <Overable
-                        key={key}
+                        key={index}
                         ref={index === acIndex ? acSelectedRef : null}
                         active={index === acIndex}
                         p={1}
-                        style={style}
                       >
                         <Text variant="secondary">{Array.isArray(item) ? item[1] : item}</Text>
                       </Overable>
-                    );
-                  }}
-                  width={200}
-                />
+                    ))}
+                  </VirtualizedList>
+                </Scrollable>
 
                 {(!connection || !database) && (
                   <Text bg="warning" letterSpacing={1} p={1} variant="caption">

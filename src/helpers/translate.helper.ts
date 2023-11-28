@@ -43,6 +43,7 @@ const tokens = {
     Show: 'Mostrar',
     'Something went wrong': 'Houve um erro inesperado',
     Structs: 'Estruturas',
+    'Table Info': 'Informações da Tabela',
     Tables: 'Tabelas',
     Test: 'Testar',
     Theme: 'Tema',

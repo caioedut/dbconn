@@ -1,13 +1,13 @@
 import { memo, startTransition, useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
-import { AutoSizer, List } from 'react-virtualized';
 
 import { RbkInputEvent } from '@react-bulk/core';
-import { Box, Button, Input, Tabs } from '@react-bulk/web';
+import { Box, Button, Input, Scrollable, Tabs } from '@react-bulk/web';
 
 import Icon from '@/components/Icon';
 import Panel from '@/components/Panel';
 import State from '@/components/State';
 import TableListItem from '@/components/TableListItem';
+import VirtualizedList from '@/components/VirtualizedList';
 import { string } from '@/helpers/string.helper';
 import { t } from '@/helpers/translate.helper';
 import useApiOnce from '@/hooks/useApiOnce';
@@ -18,6 +18,7 @@ import { Table } from '@/types/database.type';
 function TableList() {
   const { connection, database } = useConnection();
 
+  const scrollViewRef = useRef<Element>();
   const searchRef = useRef<HTMLInputElement>();
 
   const [tab, setTab] = useState<'table' | 'view'>('table');
@@ -109,22 +110,11 @@ function TableList() {
             />
           </Box>
 
-          <Box flex>
-            <AutoSizer>
-              {({ height, width }) => (
-                <List
-                  className="rbk-scroll-bar"
-                  height={height}
-                  rowCount={filteredTables?.length || 0}
-                  rowHeight={26}
-                  rowRenderer={({ index, key, style }) => (
-                    <TableListItem key={key} rawStyle={style} table={filteredTables[index]} />
-                  )}
-                  width={width}
-                />
-              )}
-            </AutoSizer>
-          </Box>
+          <Scrollable ref={scrollViewRef}>
+            <VirtualizedList rowHeight={26} scrollViewRef={scrollViewRef}>
+              {filteredTables?.map((table, index) => <TableListItem key={index} table={table} />)}
+            </VirtualizedList>
+          </Scrollable>
         </State>
       )}
     </Panel>

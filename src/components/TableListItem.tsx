@@ -4,21 +4,21 @@ import { RbkStyle, useToaster } from '@react-bulk/core';
 import { Box, Button, Text } from '@react-bulk/web';
 
 import Icon from '@/components/Icon';
+import Overable from '@/components/Overable';
 import QueryEditor from '@/components/QueryEditor';
 import TableDetails from '@/components/TableDetails';
 import { getError } from '@/helpers/api.helper';
+import { t } from '@/helpers/translate.helper';
 import useConnection from '@/hooks/useConnection';
 import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
 import { Table } from '@/types/database.type';
 
 export type TableListItemProps = {
-  rawStyle?: RbkStyle;
-  style?: RbkStyle;
   table: Table;
 };
 
-function TableListItem({ rawStyle, style, table }: TableListItemProps) {
+function TableListItem({ table }: TableListItemProps) {
   const toaster = useToaster();
 
   const { connection } = useConnection();
@@ -54,16 +54,12 @@ function TableListItem({ rawStyle, style, table }: TableListItemProps) {
   }, [add, connection, table]);
 
   return (
-    <Box
-      key={table.name}
-      rawStyle={rawStyle}
-      style={[{ '&:hover': { bg: 'primary.main.25' } }, style]}
-      onDoubleClick={handleTableDetails}
-    >
+    <Overable key={table.name} style={{ cursor: 'pointer' }} onDoubleClick={handleTableDetails}>
       <Box center noWrap row p={1} style={{ gap: 4 }}>
-        <Box h={12} ml={1} w={12}>
+        <Button circular ml={1} size="xsmall" title={t('Table Info')} variant="text" onPress={handleTableDetails}>
           <Icon name="Table" size={12} />
-        </Box>
+        </Button>
+
         <Text flex ml={1} numberOfLines={1}>
           {tableTitle}
         </Text>
@@ -86,7 +82,7 @@ function TableListItem({ rawStyle, style, table }: TableListItemProps) {
           1000
         </Button>
       </Box>
-    </Box>
+    </Overable>
   );
 }
 

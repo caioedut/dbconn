@@ -11,7 +11,6 @@ import { RobotoFont } from '@/fonts';
 import useAppearance from '@/hooks/useAppearance';
 
 import './globals.css';
-import 'react-virtualized/styles.css';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const { theme } = useAppearance();

@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Box, Divider, Text } from '@react-bulk/web';
+import { Box, Divider, Scrollable, Text } from '@react-bulk/web';
 
+import VirtualizedList from '@/components/VirtualizedList';
 import { RobotoMonoFont } from '@/fonts';
 import { Column } from '@/types/database.type';
 
@@ -11,6 +12,8 @@ export type TableResultsProps = {
 };
 
 export default function TableResults({ fields, rows }: TableResultsProps) {
+  const scrollViewRef = useRef<Element>();
+
   const [resultsSelected, setResultsSelected] = useState<any>();
 
   const handleCopyCell = useCallback(
@@ -44,6 +47,7 @@ export default function TableResults({ fields, rows }: TableResultsProps) {
     letterSpacing: 0.5,
     position: 'relative',
     textAlign: 'left',
+    textTransform: 'none',
   };
 
   const cellStyle = {
@@ -65,7 +69,7 @@ export default function TableResults({ fields, rows }: TableResultsProps) {
   };
 
   return (
-    <>
+    <Scrollable ref={scrollViewRef} style={{ overflow: 'auto' }}>
       <Box
         component="table"
         noRootStyles
@@ -91,9 +95,9 @@ export default function TableResults({ fields, rows }: TableResultsProps) {
             ))}
           </tr>
         </Box>
-        <tbody>
+        <VirtualizedList component="tbody" rowFallbackComponent="tr" scrollViewRef={scrollViewRef}>
           {rows?.map((row, rowIndex) => (
-            <Box key={rowIndex} component="tr" noRootStyles style={rowStyle}>
+            <Box key={rowIndex} component="tr" noRootStyles height={24} style={rowStyle}>
               <Box component="th" noRootStyles l="-1px" position="sticky" style={[thStyle, cellStyle]}>
                 {rowIndex + 1}
                 <Divider vertical opacity={1} style={counterStyle} />
@@ -124,9 +128,9 @@ export default function TableResults({ fields, rows }: TableResultsProps) {
               })}
             </Box>
           ))}
-        </tbody>
+        </VirtualizedList>
       </Box>
-    </>
+    </Scrollable>
   );
 }
 
