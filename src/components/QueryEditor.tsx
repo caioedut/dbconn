@@ -4,6 +4,7 @@ import {
   PanelGroup as ResizablePanelGroup,
   PanelResizeHandle as ResizablePanelHandle,
 } from 'react-resizable-panels';
+import { List } from 'react-virtualized';
 
 import { sleep, useToaster } from '@react-bulk/core';
 import { Box, Card, Scrollable, Text } from '@react-bulk/web';
@@ -390,21 +391,31 @@ function QueryEditor({ autoRun, sql = 'SELECT TOP 10 * FROM Pessoa AS pe WHERE p
                 p={0}
                 position="fixed"
                 shadow={2}
-                w={200}
                 {...(acPositions ?? {})}
               >
-                <Scrollable maxh={140}>
-                  {acItems.map((item, index) => (
-                    <Overable
-                      key={index}
-                      ref={index === acIndex ? acSelectedRef : null}
-                      active={index === acIndex}
-                      p={1}
-                    >
-                      <Text variant="secondary">{Array.isArray(item) ? item[1] : item}</Text>
-                    </Overable>
-                  ))}
-                </Scrollable>
+                <List
+                  className="rbk-scroll-bar"
+                  height={140}
+                  rowCount={acItems?.length || 0}
+                  rowHeight={22}
+                  rowRenderer={({ index, key, style }) => {
+                    const item = acItems[index];
+
+                    return (
+                      <Overable
+                        key={key}
+                        ref={index === acIndex ? acSelectedRef : null}
+                        active={index === acIndex}
+                        p={1}
+                        style={style}
+                      >
+                        <Text variant="secondary">{Array.isArray(item) ? item[1] : item}</Text>
+                      </Overable>
+                    );
+                  }}
+                  width={200}
+                />
+
                 {(!connection || !database) && (
                   <Text bg="warning" letterSpacing={1} p={1} variant="caption">
                     Pick database for best results!
