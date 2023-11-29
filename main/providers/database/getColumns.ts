@@ -14,8 +14,28 @@ export default async function getColumns(conn: ConnRef, table: string) {
       FROM INFORMATION_SCHEMA.COLUMNS
       WHERE TABLE_NAME = N'${table}'
     `,
-    mysql: ``,
-    pg: ``,
+    mysql: `
+      SELECT column_name AS name,
+        data_type AS type,
+        character_maximum_length AS maxLength,
+        numeric_precision AS numericPrecision,
+        numeric_scale AS numericScale,
+        is_nullable AS nullable,
+        column_default AS defaultValue
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = N'${table}'
+    `,
+    pg: `
+      SELECT column_name AS name,
+        udt_name AS type,
+        character_maximum_length AS maxLength,
+        numeric_precision AS numericPrecision,
+        numeric_scale AS numericScale,
+        is_nullable AS nullable,
+        column_default AS defaultValue
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = N'${table}'
+    `,
   }[conn.type];
 
   const [result] = await query(conn, rawQuery);
