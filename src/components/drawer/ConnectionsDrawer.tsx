@@ -299,7 +299,7 @@ function ConnectionsDrawer() {
         </ResizablePanel>
       </ResizablePanelGroup>
 
-      <Drawer visible={Boolean(editModel)}>
+      <Drawer visible={Boolean(editModel)} onBackdropPress={() => setEditModel(undefined)}>
         <Form ref={formConnectionRef} flex onCancel={handleCancelEditConnection} onSubmit={handleSaveConnection}>
           <Input name="id" type="hidden" value={editModel?.id} />
 

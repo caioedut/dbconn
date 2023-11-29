@@ -56,23 +56,29 @@ function TableList() {
     key: 'F2',
   });
 
-  const filteredTables = useMemo(
-    () =>
-      (tables || []).filter((table) => {
+  const filteredTables = useMemo(() => {
+    const search = string(deferredSearch).trim();
+
+    return (tables || [])
+      .filter((table) => {
         if (table.type !== tab) {
           return false;
         }
-
-        const search = string(deferredSearch).trim();
 
         if (!search) {
           return true;
         }
 
         return [table.schema, table.name].filter(Boolean).join('.').toLowerCase().includes(search.toLowerCase());
-      }),
-    [tables, tab, deferredSearch],
-  );
+      })
+      .sort((a, b) => {
+        if (!search) {
+          return string(a.name).localeCompare(string(b.name));
+        }
+
+        return a.name.indexOf(search) - b.name.indexOf(search);
+      });
+  }, [tables, tab, deferredSearch]);
 
   return (
     <Panel

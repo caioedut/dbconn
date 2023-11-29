@@ -14,8 +14,10 @@ export const PRIMARY = [
 
 export const CONTEXT = {
   '*': ['$fields', 'FROM'],
+  ALTER: ['TABLE', 'VIEW', 'PROCEDURE', 'DATABASE', 'FUNCTION'],
   AND: ['$fields', 'AND', 'OR'],
   FROM: ['$tables', 'WHERE', 'INNER JOIN', 'LEFT JOIN'],
+  INSERT: ['INTO'],
   INTO: ['$tables'],
   OR: ['$fields', 'AND', 'OR'],
   SELECT: ['$fields', '*', '* FROM', 'FROM'],

@@ -80,20 +80,9 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
 
   const acScrollRef = useRef<Element>();
   const acSelectedRef = useRef<HTMLDivElement>();
-  // const [acVisible, setAcVisible] = useState(false);
   const [acIndex, setAcIndex] = useState(-1);
   const [acItems, setAcItems] = useState<string[] | string[][]>([]);
   const [acPositions, setAcPositions] = useState<{ left: number; top: number } | null>(null);
-
-  // const connection = useMemo(
-  //   () => tab?.connection ?? connectionContext.connection,
-  //   [tab?.connection, connectionContext.connection],
-  // );
-  //
-  // const database = useMemo(
-  //   () => tab?.database ?? connectionContext.database,
-  //   [tab?.database, connectionContext.database],
-  // );
 
   const editorRef = useRef<HTMLDivElement>();
 
@@ -128,8 +117,23 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
     });
   }, []);
 
+  const closeAutocomplete = useCallback((force = true) => {
+    if (force) {
+      setAcIndex(-1);
+      setAcItems([]);
+    }
+
+    setAcPositions(null);
+  }, []);
+
   const autocomplete = useCallback(async () => {
     await sleep(10);
+
+    closeAutocomplete(false);
+
+    if (document.activeElement !== editorRef.current) {
+      return;
+    }
 
     let caretPosition = 0;
     const selection = document.getSelection() as Selection;
@@ -168,8 +172,6 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
     let newItems: any[] = [];
 
     if (connection && database) {
-      setAcPositions(null);
-
       if (!keyword) {
         newItems = [...PRIMARY];
       } else {
@@ -240,7 +242,7 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
       if (acPositions && acItems.length) {
         if (key === 'Escape') {
           prevent = true;
-          setAcPositions(null);
+          closeAutocomplete();
         }
 
         if (key === 'Enter') {
@@ -251,7 +253,7 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
 
             const textToInsert = Array.isArray(acItem) ? acItem[0] : acItem;
             insertAtSelection(editorRef.current, `${textToInsert} `);
-            setAcPositions(null);
+            closeAutocomplete();
           }
         }
 
@@ -292,7 +294,7 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
         e.preventDefault();
       }
     },
-    [acIndex, acItems, acPositions, autocomplete, sendQuery],
+    [acIndex, acItems, acPositions, autocomplete, closeAutocomplete, sendQuery],
   );
 
   const handlePaste = useCallback((e: ClipboardEvent) => {
@@ -384,6 +386,7 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
                   lineHeight: 1.35,
                   outline: 'none !important',
                 }}
+                onBlur={() => closeAutocomplete()}
                 onInput={handleChange}
                 onKeyDown={handleKeyDown}
                 onPaste={handlePaste}
