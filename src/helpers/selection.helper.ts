@@ -80,15 +80,13 @@ export function restoreSelection($element: Element, savedSelection: { end: numbe
   }
 }
 
-export function insertAtSelection(input, text) {
-  let scrollPos,
-    strPosStart = 0,
-    strPosEnd = 0,
-    isModernBrowser = 'selectionStart' in input && 'selectionEnd' in input,
-    before,
-    after,
-    range,
-    selection;
+export function insertAtSelection(input: any, text: string) {
+  const isModernBrowser = 'selectionStart' in input && 'selectionEnd' in input;
+
+  let strPosStart = 0;
+  let strPosEnd = 0;
+  let range;
+  let selection;
 
   if (
     !(
@@ -99,7 +97,7 @@ export function insertAtSelection(input, text) {
     if (input.contentEditable) {
       input.focus();
       selection = document.getSelection();
-      if (selection.getRangeAt && selection.rangeCount) {
+      if (selection && selection.getRangeAt && selection.rangeCount) {
         range = selection.getRangeAt(0);
         range.deleteContents();
         range.insertNode(document.createTextNode(text));
@@ -109,7 +107,7 @@ export function insertAtSelection(input, text) {
     return;
   }
 
-  scrollPos = input.scrollTop;
+  const scrollPos = input.scrollTop;
   input.focus();
 
   if (isModernBrowser) {
@@ -125,8 +123,8 @@ export function insertAtSelection(input, text) {
     strPosEnd = strPosStart;
   }
 
-  before = input.value.substring(0, strPosStart);
-  after = input.value.substring(strPosEnd, input.value.length);
+  const before = input.value.substring(0, strPosStart);
+  const after = input.value.substring(strPosEnd, input.value.length);
   input.value = before + text + after;
   strPosStart = strPosStart + text.length;
 
