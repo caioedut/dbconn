@@ -68,7 +68,7 @@ const sqlToAst = (sql: string) => {
   return { froms, type };
 };
 
-function QueryEditor({ autoRun, sql = 'SELECT TOP 10 * FROM Pessoa AS pe WHERE pe.', tabId }: QueryEditorProps) {
+function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
   const toaster = useToaster();
   const connectionContext = useConnection();
   const { setTitle } = useTabs();
