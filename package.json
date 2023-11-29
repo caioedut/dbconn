@@ -1,7 +1,7 @@
 {
   "name": "dbconn",
   "productName": "DbConn",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "main": "main/out/main.js",
   "homepage": "./",
@@ -21,7 +21,7 @@
     "dist": "npm run build && electron-builder"
   },
   "dependencies": {
-    "@react-bulk/core": "^0.6.1",
+    "@react-bulk/core": "^0.6.2",
     "@react-bulk/web": "^0.6.1",
     "autoprefixer": "^10.4.15",
     "caret-pos": "^2.0.0",
