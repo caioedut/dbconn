@@ -52,7 +52,9 @@ export default function TableResults({ fields, rows }: TableResultsProps) {
 
   const cellStyle = {
     border: '1px solid text.disabled',
+    maxw: 200,
     p: 1,
+    w: 0,
   };
 
   const counterStyle = {
@@ -83,7 +85,7 @@ export default function TableResults({ fields, rows }: TableResultsProps) {
               <Divider vertical opacity={1} style={counterStyle} />
             </Box>
             {fields?.map((column, columnIndex) => (
-              <Box key={columnIndex} component="th" noRootStyles style={[thStyle, cellStyle]}>
+              <Box key={columnIndex} component="th" noRootStyles style={[thStyle, cellStyle]} title={column.name}>
                 <Text fontSize="inherit" numberOfLines={1}>
                   {column.name}
                 </Text>

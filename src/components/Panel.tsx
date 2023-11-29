@@ -1,13 +1,17 @@
 import { BoxProps, ReactElement, useTheme } from '@react-bulk/core';
-import { Box, Divider, Progress, Text } from '@react-bulk/web';
+import { Box, Button, Divider, Progress, Text } from '@react-bulk/web';
+
+import Icon from '@/components/Icon';
+import { t } from '@/helpers/translate.helper';
 
 export type PanelProps = BoxProps & {
   loading?: boolean;
+  onRefresh?: () => any;
   right?: ReactElement;
   title?: string;
 };
 
-export default function Panel({ title, children, loading, right, style, ...rest }: PanelProps) {
+export default function Panel({ title, children, loading, onRefresh, right, style, ...rest }: PanelProps) {
   const theme = useTheme();
 
   const textColor = theme.contrast('primary');
@@ -28,8 +32,13 @@ export default function Panel({ title, children, loading, right, style, ...rest 
                 {title}
               </Text>
             )}
-            {Boolean(right) && (
+            {Boolean(right || onRefresh) && (
               <Box center mr={-1} my={-2}>
+                {onRefresh instanceof Function && (
+                  <Button circular size="xsmall" title={t('Refresh')} variant="text" onPress={onRefresh}>
+                    <Icon color="contrast" name="RefreshCw" />
+                  </Button>
+                )}
                 {right}
               </Box>
             )}
