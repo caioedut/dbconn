@@ -131,13 +131,14 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
 
     closeAutocomplete(false);
 
-    if (document.activeElement !== editorRef.current) {
+    const selection = document.getSelection() as Selection;
+    const range = document.createRange();
+
+    if (document.activeElement !== editorRef.current || selection.toString()) {
       return;
     }
 
     let caretPosition = 0;
-    const selection = document.getSelection() as Selection;
-    const range = document.createRange();
 
     if (range.collapsed) {
       const temp = document.createTextNode('\0');
