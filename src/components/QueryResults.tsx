@@ -39,20 +39,20 @@ function QueryResults({ data }: QueryResultsProps) {
       </Box>
 
       <Panel h="calc(100% - 36px)">
-        {(data || []).map((result, index) => {
-          return 'error' in result ? (
-            <Box key={index} border="1px solid error" hidden={index !== tab} m={2}>
-              <Text bg="error" letterSpacing={1} p={2} variant="caption">
-                ERROR {result.code} ({result.state})
-              </Text>
-              <Text p={2}>{result.message}</Text>
-            </Box>
-          ) : (
-            <Scrollable key={index} hidden={index !== tab} style={{ overflow: 'auto' }}>
+        {(data || []).map((result, index) => (
+          <Box key={index} h="100%" hidden={index !== tab}>
+            {'error' in result ? (
+              <Box border="1px solid error" hidden={index !== tab} m={2}>
+                <Text bg="error" letterSpacing={1} p={2} variant="caption">
+                  ERROR {result.code} ({result.state})
+                </Text>
+                <Text p={2}>{result.message}</Text>
+              </Box>
+            ) : (
               <TableResults fields={result.fields} rows={result.rows} />
-            </Scrollable>
-          );
-        })}
+            )}
+          </Box>
+        ))}
       </Panel>
     </Box>
   );

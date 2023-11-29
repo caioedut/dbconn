@@ -1,4 +1,4 @@
-import { JSXElementConstructor, MutableRefObject, useEffect, useMemo, useState } from 'react';
+import { JSXElementConstructor, MutableRefObject, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { BoxProps, childrenize } from '@react-bulk/core';
 import { Box } from '@react-bulk/web';
@@ -20,39 +20,40 @@ export default function VirtualizedList({
 
   const [visible, setVisible] = useState<number[]>([]);
 
+  const render = useCallback(() => {
+    if (!scrollViewRef.current) return;
+
+    const newVisible: typeof visible = [];
+
+    let curPosY = 0;
+
+    for (const index in childrenArray) {
+      const child = childrenArray[index];
+      const height = child?.props?.height ?? rowHeight ?? 0;
+
+      curPosY += height;
+      const minPosY = scrollViewRef.current.scrollTop - height;
+      const maxPosY = scrollViewRef.current.clientHeight + scrollViewRef.current.scrollTop + height;
+
+      if (curPosY >= minPosY && curPosY <= maxPosY) {
+        newVisible.push(Number(index));
+      }
+    }
+
+    setVisible(newVisible);
+  }, [scrollViewRef, childrenArray, rowHeight]);
+
   useEffect(() => {
     const $view = scrollViewRef.current;
-    if (!$view) return;
 
-    const handler = () => {
-      const newVisible: typeof visible = [];
+    render();
 
-      let curPosY = 0;
-
-      for (const index in childrenArray) {
-        const child = childrenArray[index];
-        const height = child?.props?.height ?? rowHeight ?? 0;
-
-        curPosY += height;
-        const minPosY = $view.scrollTop - height;
-        const maxPosY = $view.clientHeight + $view.scrollTop + height;
-
-        if (curPosY >= minPosY && curPosY <= maxPosY) {
-          newVisible.push(Number(index));
-        }
-      }
-
-      setVisible(newVisible);
-    };
-
-    handler();
-
-    $view.addEventListener('scroll', handler);
+    $view?.addEventListener('scroll', render);
 
     return () => {
-      $view.removeEventListener('scroll', handler);
+      $view?.removeEventListener('scroll', render);
     };
-  }, [scrollViewRef, childrenArray, rowHeight]);
+  }, [scrollViewRef, childrenArray, rowHeight, render]);
 
   return (
     <Box noRootStyles {...rest}>
