@@ -1,7 +1,7 @@
 import React, { memo, useState } from 'react';
 
 import { useTheme } from '@react-bulk/core';
-import { Box, Scrollable, Tabs, Text } from '@react-bulk/web';
+import { Box, Tabs, Text } from '@react-bulk/web';
 
 import Panel from '@/components/Panel';
 import TableResults from '@/components/TableResults';

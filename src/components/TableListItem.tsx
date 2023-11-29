@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useMemo } from 'react';
 
-import { RbkStyle, useToaster } from '@react-bulk/core';
+import { useToaster } from '@react-bulk/core';
 import { Box, Button, Text } from '@react-bulk/web';
 
 import Icon from '@/components/Icon';
