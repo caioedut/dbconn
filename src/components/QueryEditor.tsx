@@ -192,7 +192,6 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
         // Store Fields
         for (const from of ast.froms) {
           try {
-            console.log(from);
             const data = await getColumns(from.table);
 
             const withAlias = data.map((item) => [from.alias ?? from.table, item.name].filter(Boolean).join('.'));

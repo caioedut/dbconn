@@ -14,7 +14,7 @@ export type TableResultsProps = {
 export default function TableResults({ fields, rows }: TableResultsProps) {
   const scrollViewRef = useRef<Element>();
 
-  const [resultsSelected, setResultsSelected] = useState<any>();
+  const [resultsSelected, setResultsSelected] = useState<[number, string]>();
 
   const handleCopyCell = useCallback(
     async (e: Event) => {
@@ -23,7 +23,7 @@ export default function TableResults({ fields, rows }: TableResultsProps) {
       if (!selection && resultsSelected) {
         e.preventDefault();
 
-        const [rowIndex, fieldName] = resultsSelected.split('_');
+        const [rowIndex, fieldName] = resultsSelected;
         const text = getDisplayValue(rows?.[rowIndex]?.[fieldName]);
         await navigator.clipboard.writeText(text ?? 'NULL');
       }
@@ -105,8 +105,7 @@ export default function TableResults({ fields, rows }: TableResultsProps) {
                 <Divider vertical opacity={1} style={counterStyle} />
               </Box>
               {fields?.map((column, columnIndex) => {
-                const selectionKey = `${rowIndex}_${column.name}`;
-                const isSelected = selectionKey === resultsSelected;
+                const isSelected = resultsSelected?.[0] === rowIndex && resultsSelected?.[1] === column.name;
                 const displayValue = getDisplayValue(row?.[column.name]);
 
                 return (
@@ -116,7 +115,7 @@ export default function TableResults({ fields, rows }: TableResultsProps) {
                     noRootStyles
                     bg={isSelected ? 'primary.main.35' : undefined}
                     style={cellStyle}
-                    onPress={() => setResultsSelected(selectionKey)}
+                    onPress={() => setResultsSelected([rowIndex, column.name])}
                   >
                     <Text numberOfLines={1} variant="secondary">
                       {displayValue ?? (
