@@ -1,11 +1,11 @@
 {
   "name": "dbconn",
   "productName": "DbConn",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "main": "main/out/main.js",
   "homepage": "./",
-  "description": "My Next.js project",
+  "description": "Multi-database connect client",
   "author": "test",
   "scripts": {
     "dev": "cross-env NODE_ENV=development concurrently -k \"cross-env BROWSER=none npm run next:dev\" \"npm run electron:dev\"",
