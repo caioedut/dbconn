@@ -51,7 +51,7 @@ const sqlToAst = (sql: string) => {
           .split(',')
           .filter((item) => item.trim())
           .map((item) => {
-            const matches = item.trim().matchAll(/(\w+)(\sAS\s)?(\w+)?/gi);
+            const matches = item.trim().matchAll(/(\S+)(\sAS\s)?(\w+)?/gi);
             const match = matches?.next();
 
             const table = match?.value?.[1] ?? null;
@@ -156,64 +156,58 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
     // .filter((cmd: string) => cmd.trim());
 
     const keyword =
-      splitted.filter((cmd: string) => Object.keys(CONTEXT).includes(cmd.toUpperCase().trim())).at(-1) ?? '';
+      splitted
+        .filter((cmd: string) => Object.keys(CONTEXT).includes(cmd.toUpperCase().trim()))
+        .at(-1)
+        ?.toUpperCase() ?? '';
 
     const context = splitted.at(-1) ?? '';
 
-    let newItems: typeof acItems = CONTEXT?.[context as keyof typeof CONTEXT] ?? [];
+    console.log({ context, keyword });
+
+    let newItems: any[] = [];
 
     if (connection && database) {
-      const columns: string[] = [];
-
-      // Store Fields
-      for (const from of ast.froms) {
-        try {
-          const data = await getColumns(from.table);
-
-          const withAlias = data.map((item) => [from.alias ?? from.table, item.name].filter(Boolean).join('.'));
-          const withoutAlias = data.map((item) => [item.name].filter(Boolean).join('.'));
-
-          columns.push(...withAlias, ...(!context ? [] : withoutAlias));
-        } catch {}
-      }
-
       setAcPositions(null);
 
-      // if (keyword === 'FROM' && (!context || context.includes('.'))) {
-      if (keyword === 'FROM' && keyword !== context) {
-        const withAlias = (tables || [])
-          .filter((table) => table.fullName.toUpperCase().startsWith(context.toUpperCase()))
-          .map(({ fullName }) => fullName);
-
-        const withoutAlias = (tables || [])
-          .filter((table) => table.name.toUpperCase().startsWith(context.toUpperCase()))
-          .map(({ name }) => name);
-
-        newItems = [...withAlias, ...(!context ? [] : withoutAlias)].map((table) => [
-          table.substring(context.length),
-          table,
-        ]);
+      if (!keyword) {
+        newItems = [...PRIMARY];
+      } else {
+        newItems = [...(CONTEXT?.[keyword as keyof typeof CONTEXT] ?? [])];
       }
 
-      // Table/Column
-      if (['SELECT', 'WHERE'].includes(keyword) && keyword !== context) {
-        const columnsFrom = columns.filter((column) => column.toUpperCase().startsWith(context.toUpperCase()));
+      if (newItems.includes('$tables')) {
+        const withAlias = (tables || []).map(({ fullName }) => fullName);
+        const withoutAlias = (tables || []).map(({ name }) => name);
+        const listTables = [...withAlias, ...(!context ? [] : withoutAlias)];
+        newItems.splice(newItems.indexOf('$tables'), 1, ...listTables);
+      }
 
-        if (columnsFrom.length) {
-          newItems = columnsFrom.map((column) => [column.substring(context.length), column]);
+      if (newItems.includes('$fields')) {
+        const columns: string[] = [];
+
+        // Store Fields
+        for (const from of ast.froms) {
+          try {
+            console.log(from);
+            const data = await getColumns(from.table);
+
+            const withAlias = data.map((item) => [from.alias ?? from.table, item.name].filter(Boolean).join('.'));
+            const withoutAlias = data.map((item) => [item.name].filter(Boolean).join('.'));
+
+            columns.push(...withAlias, ...(!context ? [] : withoutAlias));
+          } catch {}
         }
+
+        newItems.splice(newItems.indexOf('$fields'), 1, ...columns);
       }
 
-      // if (keyword === 'SELECT' && !ast.froms.length) {
-      //   newItems = ['*'];
-      // }
-      //
-      // if (['AND', 'OR', 'SELECT', 'WHERE'].includes(keyword ?? '') && ast.froms.length) {
-      //   newItems = columns;
-      // }
+      newItems = newItems
+        .filter((item) => item.toUpperCase().startsWith(context.toUpperCase()))
+        .map((item: string) => [item.substring(context.length), item]);
     }
 
-    if (newItems) {
+    if (newItems?.length) {
       showAutocomplete();
     }
 
@@ -256,7 +250,7 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
             prevent = true;
 
             const textToInsert = Array.isArray(acItem) ? acItem[0] : acItem;
-            insertAtSelection(editorRef.current, textToInsert);
+            insertAtSelection(editorRef.current, `${textToInsert} `);
             setAcPositions(null);
           }
         }
@@ -290,11 +284,13 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
         }
       }
 
+      if (key !== 'Escape') {
+        autocomplete().catch(() => null);
+      }
+
       if (prevent) {
         e.preventDefault();
       }
-
-      autocomplete().catch(() => null);
     },
     [acIndex, acItems, acPositions, autocomplete, sendQuery],
   );
@@ -403,7 +399,7 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
                 shadow={2}
                 {...(acPositions ?? {})}
               >
-                <Scrollable ref={acScrollRef} h={140} w={200}>
+                <Scrollable ref={acScrollRef} maxh={140} w={240}>
                   <VirtualizedList rowHeight={22} scrollViewRef={acScrollRef}>
                     {acItems?.map((item, index) => (
                       <Overable

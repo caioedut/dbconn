@@ -1,15 +1,25 @@
-export const PRIMARY = ['SELECT', 'UPDATE', 'DELETE', 'INSERT', 'CREATE', 'ALTER', 'DROP', 'FROM', 'INTO', 'WHERE'];
-
-export const FEATURED = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'ALTER', 'CREATE', 'DROP', 'USE', 'FROM'];
+export const PRIMARY = [
+  'SELECT',
+  'INSERT',
+  'UPDATE',
+  'DELETE',
+  'CREATE',
+  'ALTER',
+  'DROP',
+  'FROM',
+  'INTO',
+  'WHERE',
+  'USE',
+];
 
 export const CONTEXT = {
-  _: ['SELECT', 'UPDATE', 'DELETE', 'INSERT', 'CREATE', 'ALTER', 'DROP'],
-  '*': ['FROM'],
-  AND: ['AND', 'OR'],
-  FROM: ['WHERE', 'INNER JOIN', 'LEFT JOIN'],
-  OR: ['AND', 'OR'],
-  SELECT: ['FROM'],
-  WHERE: ['AND', 'OR'],
+  '*': ['$fields', 'FROM'],
+  AND: ['$fields', 'AND', 'OR'],
+  FROM: ['$tables', 'WHERE', 'INNER JOIN', 'LEFT JOIN'],
+  INTO: ['$tables'],
+  OR: ['$fields', 'AND', 'OR'],
+  SELECT: ['$fields', '*', '* FROM', 'FROM'],
+  WHERE: ['$fields', 'AND', 'OR'],
 };
 
 export const OPERATOR = [
