@@ -222,7 +222,9 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
 
   const handleKeyDown = useCallback(
     (e: any) => {
-      const { code, ctrlKey, key } = e;
+      const { altKey, code, ctrlKey, key, metaKey, shiftKey } = e;
+
+      const isModifierPressed = ctrlKey | altKey | metaKey | shiftKey;
 
       let prevent = false;
 
@@ -235,8 +237,13 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
         prevent = true;
       }
 
+      if (key === 'Tab' && !isModifierPressed) {
+        prevent = true;
+        insertAtSelection(editorRef.current, `  `);
+      }
+
       // Autocomplete
-      if (acPositions) {
+      if (acPositions && acItems.length) {
         if (key === 'Escape') {
           prevent = true;
           setAcPositions(null);
@@ -355,6 +362,7 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
             <Scrollable>
               <Box
                 ref={editorRef}
+                component="pre"
                 contentEditable
                 noRootStyles
                 suppressContentEditableWarning
@@ -363,6 +371,7 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
                 className={RobotoMonoFont.className}
                 // dangerouslySetInnerHTML={{ __html: parseHTML(sql ?? '') }}
                 h="100%"
+                m={0}
                 p={2}
                 spellCheck={false}
                 style={{
