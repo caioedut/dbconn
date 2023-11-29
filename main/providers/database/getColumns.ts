@@ -2,6 +2,10 @@ import { ConnRef } from '../../types/database.type';
 import query from './query';
 
 export default async function getColumns(conn: ConnRef, table: string) {
+  const split = table.replace(/[^\w.]/g, '').split('.');
+  const tableName = split.pop();
+  const tableSchema = split.pop();
+
   const rawQuery = {
     mssql: `
       SELECT column_name AS name,
@@ -12,7 +16,9 @@ export default async function getColumns(conn: ConnRef, table: string) {
         is_nullable AS nullable,
         column_default AS defaultValue
       FROM INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_NAME = N'${table}'
+      WHERE TABLE_NAME = N'${tableName}'
+        AND TABLE_CATALOG = N'${conn.database}'
+        ${tableSchema ? `AND TABLE_SCHEMA = N'${tableSchema}'` : ''}
     `,
     mysql: `
       SELECT column_name AS name,
@@ -23,7 +29,8 @@ export default async function getColumns(conn: ConnRef, table: string) {
         is_nullable AS nullable,
         column_default AS defaultValue
       FROM INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_NAME = N'${table}'
+      WHERE TABLE_NAME = N'${tableName}'
+        AND TABLE_SCHEMA = N'${tableSchema || conn.database}'
     `,
     pg: `
       SELECT column_name AS name,
@@ -34,7 +41,10 @@ export default async function getColumns(conn: ConnRef, table: string) {
         is_nullable AS nullable,
         column_default AS defaultValue
       FROM INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_NAME = N'${table}'
+      WHERE TABLE_NAME = N'${tableName}'
+        AND TABLE_CATALOG = N'${conn.database}'
+        AND TABLE_SCHEMA != N'pg_catalog'
+        ${tableSchema ? `AND TABLE_SCHEMA = N'${tableSchema}'` : ''}
     `,
   }[conn.type];
 
