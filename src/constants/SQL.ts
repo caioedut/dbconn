@@ -21,6 +21,7 @@ export const CONTEXT = {
   INTO: ['$tables'],
   OR: ['$fields', 'AND', 'OR'],
   SELECT: ['$fields', '*', '* FROM', 'FROM'],
+  TOP: ['$fields'],
   WHERE: ['$fields', 'AND', 'OR'],
 };
 

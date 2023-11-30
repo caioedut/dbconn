@@ -6,7 +6,8 @@ import { ConnRef } from '../../types/database.type';
 
 export default async function query(conn: ConnRef, query?: string) {
   if (!query) {
-    throw new Error(`Client "${conn.type}" is not supported.`);
+    // throw new Error(`Client "${conn.type}" is not supported.`);
+    throw new Error(`Please type a query.`);
   }
 
   const queries = query

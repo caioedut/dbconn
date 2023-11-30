@@ -94,13 +94,15 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
     setResults(undefined);
 
     const selection = window.getSelection();
-    const text = selection?.toString() || editorRef.current?.innerText || '';
+    const text = (selection?.toString() || editorRef.current?.innerText || '').trim();
 
-    try {
-      const response = await api.post('/query', connection?.id, text);
-      setResults(response?.data);
-    } catch (err) {
-      toaster.error(getError(err));
+    if (text) {
+      try {
+        const response = await api.post('/query', connection?.id, text);
+        setResults(response?.data);
+      } catch (err) {
+        toaster.error(getError(err));
+      }
     }
 
     setIsLoading(false);
@@ -214,7 +216,7 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
     }
 
     setAcItems(newItems);
-  }, [connection, database, getColumns, showAutocomplete, tables]);
+  }, [closeAutocomplete, connection, database, getColumns, showAutocomplete, tables]);
 
   const handleKeyDown = useCallback(
     (e: any) => {
@@ -286,7 +288,9 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
         }
       }
 
-      if (key !== 'Escape') {
+      if ((!acPositions || !acItems.length) && ['ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp'].includes(key)) {
+        // Do nothing
+      } else if (key !== 'Escape') {
         autocomplete().catch(() => null);
       }
 
