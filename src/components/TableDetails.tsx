@@ -47,7 +47,7 @@ export default function TableDetails({ connection, table }: TableDetailsProps) {
   return (
     <Box noWrap row h="100%">
       <Box w={240}>
-        <Panel flex loading={isValidatingColumns} title={t('Columns')} onRefresh={() => mutateColumns()}>
+        <Panel flex h="100%" loading={isValidatingColumns} title={t('Columns')} onRefresh={() => mutateColumns()}>
           <State error={errorColumns}>
             <Scrollable>
               {columns?.map((column) => (
