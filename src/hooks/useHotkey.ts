@@ -4,6 +4,7 @@ export type HotkeyOptions = {
   alt?: boolean;
   callback: (e: KeyboardEvent) => void;
   ctrl?: boolean;
+  disabled?: boolean;
   key: string;
   meta?: boolean;
   shift?: boolean;
@@ -12,6 +13,7 @@ export type HotkeyOptions = {
 export default function useHotkey(options: HotkeyOptions) {
   useEffect(() => {
     function listener(e: KeyboardEvent) {
+      if (options.disabled) return;
       if (e.key !== options.key) return;
 
       if (options.alt && !e.altKey) return;
@@ -37,14 +39,16 @@ export default function useHotkey(options: HotkeyOptions) {
   }, [options]);
 
   return {
-    title: `(${[
-      options.ctrl && 'Ctrl',
-      options.alt && 'Alt',
-      options.meta && 'Meta',
-      options.shift && 'Shift',
-      options.key.length === 1 ? options.key.toUpperCase() : options.key,
-    ]
-      .filter(Boolean)
-      .join('+')})`,
+    title: options.disabled
+      ? ''
+      : `(${[
+          options.ctrl && 'Ctrl',
+          options.alt && 'Alt',
+          options.meta && 'Meta',
+          options.shift && 'Shift',
+          options.key.length === 1 ? options.key.toUpperCase() : options.key,
+        ]
+          .filter(Boolean)
+          .join('+')})`,
   };
 }

@@ -23,6 +23,7 @@ function TableList() {
 
   const [tab, setTab] = useState<'table' | 'view'>('table');
   const [search, setSearch] = useState('');
+  const [searchEnabled, setSearchEnabled] = useState(false);
   const deferredSearch = useDeferredValue(search);
 
   const {
@@ -32,7 +33,7 @@ function TableList() {
     mutate: mutateTables,
   } = useApiOnce<Table[]>(connection && database && '/tables', connection?.id, database?.name);
 
-  const handleSearch = useCallback((e: RbkInputEvent, value: string) => {
+  const handleSearch = useCallback((_: any, value: string) => {
     scrollViewRef.current?.scrollTo({ behavior: 'instant', top: 0 });
 
     startTransition(() => {
@@ -44,6 +45,12 @@ function TableList() {
     callback: () => searchRef.current?.focus(),
     ctrl: true,
     key: 'f',
+  });
+
+  const cancelSearchHk = useHotkey({
+    callback: () => handleSearch({}, ''),
+    disabled: !searchEnabled,
+    key: 'Escape',
   });
 
   const displayTablesHk = useHotkey({
@@ -75,7 +82,7 @@ function TableList() {
       })
       .sort((a, b) => {
         if (!search) {
-          return string(a.name).localeCompare(string(b.name));
+          return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
         }
 
         return a.name.indexOf(search) - b.name.indexOf(search);
@@ -111,10 +118,17 @@ function TableList() {
           <Box p={2} pt={0}>
             <Input
               ref={searchRef}
+              endAddon={
+                search ? (
+                  <Icon name="X" title={cancelSearchHk.title} onPress={(_: Event) => handleSearch(_, '')} />
+                ) : null
+              }
               placeholder={`${t('Search')}... ${searchTablesHk.title}`}
               size="small"
               value={search}
+              onBlur={() => setSearchEnabled(false)}
               onChange={handleSearch}
+              onFocus={() => setSearchEnabled(true)}
             />
           </Box>
 
