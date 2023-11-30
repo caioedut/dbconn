@@ -1,4 +1,5 @@
 export type Result = {
+  affectedRows: null | number;
   fields: Column[];
   rows: any[];
 };
@@ -35,10 +36,11 @@ export type Table = {
 };
 
 export type Column = {
+  columnKey: 'FK' | 'PK' | null;
   defaultValue: unknown;
   maxLength: null | number;
   name: string;
-  nullable: boolean;
+  nullable: 'NO' | 'YES';
   numericPrecision: null | number;
   numericScale: null | number;
   type: string;

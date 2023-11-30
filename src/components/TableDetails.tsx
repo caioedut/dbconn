@@ -3,6 +3,7 @@ import { useListState } from 'react-state-hooks';
 
 import { Box, Checkbox, Scrollable, Text } from '@react-bulk/web';
 
+import Icon from '@/components/Icon';
 import Overable from '@/components/Overable';
 import Panel from '@/components/Panel';
 import State from '@/components/State';
@@ -24,7 +25,7 @@ export default function TableDetails({ connection, table }: TableDetailsProps) {
     error: errorColumns,
     isValidating: isValidatingColumns,
     mutate: mutateColumns,
-  } = useApiOnce<Column[]>('/tables/columns', connection?.id, table.name);
+  } = useApiOnce<Column[]>('/tables/columns', connection?.id, table.fullName);
 
   const {
     data: rows,
@@ -49,21 +50,33 @@ export default function TableDetails({ connection, table }: TableDetailsProps) {
       <Box w={240}>
         <Panel flex h="100%" loading={isValidatingColumns} title={t('Columns')} onRefresh={() => mutateColumns()}>
           <State error={errorColumns}>
-            <Scrollable>
+            <Scrollable style={{ overflow: 'auto' }}>
               {columns?.map((column) => (
                 <Overable key={column.name} px={2} py={1} onPress={() => handleToogleColumn(column)}>
-                  <Box center noWrap row>
+                  <Box noWrap row alignItems="center">
                     <Checkbox //
                       readOnly
                       checked={!hiddenColumns.includes(column.name)}
                       my={-1}
+                      size="small"
                     />
-                    <Text flex>
-                      {column.name}{' '}
-                      <Text color="text.disabled">
-                        {column.type}
-                        {column.maxLength ? `(${column.maxLength})` : ''}
+                    <Text ml={1} variant="secondary">
+                      {column.name}
+                    </Text>
+                    {column.columnKey === 'PK' && (
+                      <Box ml={2} style={{ rotate: '180deg' }} title={t('Primary Key')}>
+                        <Icon color="yellow" name="Key" size={14} />
+                      </Box>
+                    )}
+                    {column.nullable === 'YES' && (
+                      <Text color="warning" letterSpacing={1} lineHeight={1} ml={2} size={0.6}>
+                        NULL
                       </Text>
+                    )}
+                    <Box ml="auto" />
+                    <Text color="text.disabled" ml={2} variant="secondary">
+                      {column.type}
+                      {column.maxLength ? `(${column.maxLength})` : ''}
                     </Text>
                   </Box>
                 </Overable>

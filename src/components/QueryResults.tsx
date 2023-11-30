@@ -28,7 +28,7 @@ function QueryResults({ data }: QueryResultsProps) {
                   {t('RESULT')} #{index + 1}
                 </Text>
                 <Text right color={theme.contrast('primary')} variant="caption">
-                  {'error' in result ? t('ERROR') : `${result.rows.length} ${t('rows')}`}
+                  {'error' in result ? t('ERROR') : `${result.affectedRows ?? result.rows.length} ${t('row(s)')}`}
                 </Text>
               </>
             ) as any,
@@ -47,6 +47,15 @@ function QueryResults({ data }: QueryResultsProps) {
                   ERROR {result.code} ({result.state})
                 </Text>
                 <Text p={2}>{result.message}</Text>
+              </Box>
+            ) : result.affectedRows ? (
+              <Box border="1px solid success" hidden={index !== tab} m={2}>
+                <Text bg="success" letterSpacing={1} p={2} variant="caption">
+                  SUCCESS
+                </Text>
+                <Text p={2}>
+                  {result.affectedRows} {t('row(s) affected')}.
+                </Text>
               </Box>
             ) : (
               <TableResults fields={result.fields} rows={result.rows} />

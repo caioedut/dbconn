@@ -20,8 +20,11 @@ export default async function query(conn: ConnRef, query?: string) {
     const promise = conn.current
       .raw(queryLine)
       .then((res) => {
+        // pg res.command === 'INSERT'
+
         let rows = [];
         let fields = [];
+        let affectedRows: null | number = null;
 
         if (conn.type === 'mssql') {
           rows = res;
@@ -33,22 +36,30 @@ export default async function query(conn: ConnRef, query?: string) {
         }
 
         if (conn.type === 'mysql') {
-          rows = res[0];
-          fields = res[1].map((field: MySqlField) => ({
-            name: field.name,
-            type: MySqlTypes[field.type as keyof typeof MySqlTypes],
-          }));
+          if ('affectedRows' in res[0]) {
+            affectedRows = res[0].affectedRows;
+          } else {
+            rows = res[0];
+            fields = res[1].map((field: MySqlField) => ({
+              name: field.name,
+              type: MySqlTypes[field.type as keyof typeof MySqlTypes],
+            }));
+          }
         }
 
         if (conn.type === 'pg') {
-          rows = res.rows;
-          fields = res.fields.map((field: PgField) => ({
-            name: field.name,
-            type: PgTypes[field.dataTypeID as keyof typeof PgTypes] ?? null,
-          }));
+          if (res.command !== 'SELECT') {
+            affectedRows = res.rowCount;
+          } else {
+            rows = res.rows;
+            fields = res.fields.map((field: PgField) => ({
+              name: field.name,
+              type: PgTypes[field.dataTypeID as keyof typeof PgTypes] ?? null,
+            }));
+          }
         }
 
-        return { fields, rows };
+        return { affectedRows, fields, rows };
       })
       .catch((err) => {
         const error = true;
