@@ -5,7 +5,9 @@ import React, { useEffect, useRef } from 'react';
 import { useTheme } from '@react-bulk/core';
 import { Box, Button, Scrollable, Text } from '@react-bulk/web';
 
+import ContextMenu from '@/components/ContextMenu';
 import Icon from '@/components/Icon';
+import Overable from '@/components/Overable';
 import QueryEditor from '@/components/QueryEditor';
 import { t } from '@/helpers/translate.helper';
 import useHotkey from '@/hooks/useHotkey';
@@ -54,8 +56,13 @@ export default function Page() {
 
   const handleCloseTab = (e: MouseEvent, tabId: string) => {
     e.stopPropagation();
-
     close(tabId);
+  };
+
+  const handleCloseTabsExcept = (e: MouseEvent, tabId: string) => {
+    e.stopPropagation();
+    tabs.forEach((tab) => tab.id !== tabId && close(tab.id));
+    setActive(tabId);
   };
 
   useEffect(() => {
@@ -112,11 +119,24 @@ export default function Page() {
                 bg={isActive ? 'primary' : 'background'}
                 border="1px solid background.secondary"
                 borderRight="none"
+                position="relative"
                 px={2}
                 title={title}
                 onPress={(e: MouseEvent) => handlePressTab(e, tab.id)}
                 onPressIn={(e: MouseEvent) => handlePressInTab(e, tab.id)}
               >
+                <ContextMenu>
+                  <Overable p={1} onPress={(e: MouseEvent) => handleCloseTab(e, tab.id)}>
+                    <Text variant="secondary">{t('Close')}</Text>
+                  </Overable>
+                  <Overable p={1} onPress={(e: MouseEvent) => handleCloseTabsExcept(e, tab.id)}>
+                    <Text variant="secondary">{t('Close other tabs')}</Text>
+                  </Overable>
+                  <Overable p={1} onPress={(e: MouseEvent) => handleCloseTabsExcept(e, '')}>
+                    <Text variant="secondary">{t('Close all tabs')}</Text>
+                  </Overable>
+                </ContextMenu>
+
                 <Box center flex noWrap row maxw={200}>
                   {tab.icon && (
                     <Box mr={2}>
