@@ -1,8 +1,9 @@
 import { ConnRef } from '../../types/database.type';
 import connect from './connect';
+import disconnect from './disconnect';
 
 export default async function setDatabase(conn: ConnRef, database: string) {
-  await conn.current.destroy();
+  await disconnect(conn);
 
   conn.current = await connect({
     ...conn,

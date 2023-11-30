@@ -1,8 +1,9 @@
-import { Knex } from 'knex';
-
 export type ConnRef = {
   connected?: boolean;
-  current: Knex;
+  current: {
+    destroy: () => Promise<void>;
+    query: (raw: string) => Promise<any>;
+  };
   database: string;
   host: string;
   id: string;

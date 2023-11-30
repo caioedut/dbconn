@@ -15,8 +15,8 @@ export async function GET_columns(id: string, table: string) {
   return getColumns(conn, table);
 }
 
-export async function GET_rows(id: string, table: string) {
+export async function GET_rows(id: string, table: string, limit?: number, offset?: number) {
   const conn = await getConnection(id);
 
-  return getRows(conn, table);
+  return getRows(conn, table, limit, offset);
 }

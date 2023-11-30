@@ -7,7 +7,7 @@ export default async function setPassword(conn: ConnRef, password: string) {
     pg: `ALTER USER ${conn.user} WITH PASSWORD '${password}'`,
   }[conn.type];
 
-  const result = await conn.current.raw(rawQuery);
+  const result = await conn.current.query(rawQuery);
 
   console.log(result);
 

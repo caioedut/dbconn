@@ -48,7 +48,7 @@ function QueryResults({ data }: QueryResultsProps) {
                 </Text>
                 <Text p={2}>{result.message}</Text>
               </Box>
-            ) : result.affectedRows ? (
+            ) : result.affectedRows !== null ? (
               <Box border="1px solid success" hidden={index !== tab} m={2}>
                 <Text bg="success" letterSpacing={1} p={2} variant="caption">
                   SUCCESS

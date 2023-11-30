@@ -18,20 +18,21 @@ export default async function query(conn: ConnRef, query?: string) {
 
   for (const queryLine of queries) {
     const promise = conn.current
-      .raw(queryLine)
+      .query(queryLine)
       .then((res) => {
-        // pg res.command === 'INSERT'
-
         let rows = [];
         let fields = [];
         let affectedRows: null | number = null;
 
         if (conn.type === 'mssql') {
-          rows = res;
-
-          // TODO: get column types
-          if (rows.length) {
-            fields = Object.keys(rows[0]).map((name) => ({ name }));
+          if (!res?.recordset) {
+            affectedRows = res.rowsAffected[0];
+          } else {
+            rows = res.recordset;
+            fields = Object.values(res.recordset.columns).map((field: any) => ({
+              name: field.name,
+              type: null,
+            }));
           }
         }
 
@@ -71,7 +72,7 @@ export default async function query(conn: ConnRef, query?: string) {
         if (conn.type === 'mssql') {
           code = err.number;
           state = err.state;
-          symbol = err.code;
+          symbol = err.number;
           message = err.message;
         }
 

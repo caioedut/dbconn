@@ -52,7 +52,13 @@ export default function TableDetails({ connection, table }: TableDetailsProps) {
           <State error={errorColumns}>
             <Scrollable style={{ overflow: 'auto' }}>
               {columns?.map((column) => (
-                <Overable key={column.name} px={2} py={1} onPress={() => handleToogleColumn(column)}>
+                <Overable
+                  key={column.name}
+                  px={2}
+                  py={1}
+                  title={column.name}
+                  onPress={() => handleToogleColumn(column)}
+                >
                   <Box noWrap row alignItems="center">
                     <Checkbox //
                       readOnly
@@ -60,7 +66,7 @@ export default function TableDetails({ connection, table }: TableDetailsProps) {
                       my={-1}
                       size="small"
                     />
-                    <Text ml={1} variant="secondary">
+                    <Text flexShrink={1} ml={1} numberOfLines={1} variant="secondary">
                       {column.name}
                     </Text>
                     {column.columnKey === 'PK' && (
@@ -88,7 +94,9 @@ export default function TableDetails({ connection, table }: TableDetailsProps) {
       <Box flex>
         <Panel flex h="100%" loading={isValidatingRows} ml={1} title={t('Results')} onRefresh={() => mutateRows()}>
           <State error={errorRows}>
-            <TableResults fields={columns?.filter((column) => !hiddenColumns.includes(column.name))} rows={rows} />
+            {Boolean(columns) && (
+              <TableResults fields={columns?.filter((column) => !hiddenColumns.includes(column.name))} rows={rows} />
+            )}
           </State>
         </Panel>
       </Box>
