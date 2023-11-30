@@ -2,7 +2,7 @@ import mssql from 'mssql';
 import mysql from 'mysql2/promise';
 import { Client } from 'pg';
 
-import { Connect } from '../../types/database.type';
+import { ConnRef, Connect } from '../../types/database.type';
 
 export default async function connect(options: Connect, check = true) {
   const { database, host, password, port, type, user } = options;
@@ -60,5 +60,5 @@ export default async function connect(options: Connect, check = true) {
     }
   }
 
-  return conn;
+  return conn as ConnRef['current'];
 }
