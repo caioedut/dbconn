@@ -137,7 +137,6 @@ export default function Page() {
                 borderRight="none"
                 position="relative"
                 px={2}
-                title={title}
                 onPress={(e: MouseEvent) => handlePressTab(e, tab.id)}
                 onPressIn={(e: MouseEvent) => handlePressInTab(e, tab.id)}
               >
@@ -153,7 +152,7 @@ export default function Page() {
                   </Overable>
                 </ContextMenu>
 
-                <Box center flex noWrap row maxw={200}>
+                <Box center flex noWrap row maxw={200} title={title}>
                   {tab.icon && (
                     <Box mr={2}>
                       <Icon color={isActive ? 'contrast' : 'primary'} name={tab.icon} />

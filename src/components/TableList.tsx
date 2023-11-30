@@ -33,6 +33,8 @@ function TableList() {
   } = useApiOnce<Table[]>(connection && database && '/tables', connection?.id, database?.name);
 
   const handleSearch = useCallback((e: RbkInputEvent, value: string) => {
+    scrollViewRef.current?.scrollTo({ behavior: 'instant', top: 0 });
+
     startTransition(() => {
       setSearch(value);
     });
