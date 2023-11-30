@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import { useTheme } from '@react-bulk/core';
 import { Box, Button, Scrollable, Text } from '@react-bulk/web';
@@ -13,57 +13,73 @@ import { t } from '@/helpers/translate.helper';
 import useHotkey from '@/hooks/useHotkey';
 import useTabs from '@/hooks/useTabs';
 
+const tabsHeight = 36;
+
 export default function Page() {
   const theme = useTheme();
   const { active, add, close, goTo, goToNext, goToPrev, setActive, tabs } = useTabs();
 
   const scrollRef = useRef<HTMLDivElement>();
 
-  const tabsHeight = 36;
-
-  function addQueryEditorTab() {
+  const addQueryEditorTab = useCallback(() => {
     add({
       icon: 'File',
       render: ({ id }) => <QueryEditor tabId={id} />,
     });
-  }
+  }, [add]);
 
-  const handleScrollTabs = (e: MouseEvent) => {
-    // @ts-expect-error
-    scrollRef.current?.scrollBy(e.deltaY, 0);
-  };
+  const handleScrollTabs = useCallback(
+    (e: MouseEvent) => {
+      // @ts-expect-error
+      scrollRef.current?.scrollBy(e.deltaY, 0);
+    },
+    [scrollRef],
+  );
 
-  const handleAddTab = (e: MouseEvent) => {
-    e.stopPropagation();
-
-    addQueryEditorTab();
-  };
-
-  const handlePressTab = (e: MouseEvent, tabId: string) => {
-    e.stopPropagation();
-
-    setActive(tabId);
-  };
-
-  const handlePressInTab = (e: MouseEvent, tabId: string) => {
-    // Middle Button
-    if (e.button === 1) {
+  const handleAddTab = useCallback(
+    (e: MouseEvent) => {
       e.stopPropagation();
-      e.preventDefault();
+      addQueryEditorTab();
+    },
+    [addQueryEditorTab],
+  );
+
+  const handlePressTab = useCallback(
+    (e: MouseEvent, tabId: string) => {
+      e.stopPropagation();
+      setActive(tabId);
+    },
+    [setActive],
+  );
+
+  const handlePressInTab = useCallback(
+    (e: MouseEvent, tabId: string) => {
+      // Middle Button
+      if (e.button === 1) {
+        e.stopPropagation();
+        e.preventDefault();
+        close(tabId);
+      }
+    },
+    [close],
+  );
+
+  const handleCloseTab = useCallback(
+    (e: MouseEvent, tabId: string) => {
+      e.stopPropagation();
       close(tabId);
-    }
-  };
+    },
+    [close],
+  );
 
-  const handleCloseTab = (e: MouseEvent, tabId: string) => {
-    e.stopPropagation();
-    close(tabId);
-  };
-
-  const handleCloseTabsExcept = (e: MouseEvent, tabId: string) => {
-    e.stopPropagation();
-    tabs.forEach((tab) => tab.id !== tabId && close(tab.id));
-    setActive(tabId);
-  };
+  const handleCloseTabsExcept = useCallback(
+    (e: MouseEvent, tabId: string) => {
+      e.stopPropagation();
+      tabs.forEach((tab) => tab.id !== tabId && close(tab.id));
+      setActive(tabId);
+    },
+    [tabs, close, setActive],
+  );
 
   useEffect(() => {
     document.querySelector(`#tab_${active}`)?.scrollIntoView({ behavior: 'smooth' });
