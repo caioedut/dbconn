@@ -7,6 +7,13 @@ const base: ThemeEditProps = {
         corners: 0,
       },
     },
+    Modal: {
+      defaultStyles: {
+        root: {
+          border: '1px solid text',
+        },
+      },
+    },
     Toaster: {
       defaultProps: {
         halign: 'right',

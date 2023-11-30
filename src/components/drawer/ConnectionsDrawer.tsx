@@ -381,6 +381,9 @@ function ConnectionsDrawer() {
           <Scrollable contentInset={4} maxw="100%" w={400}>
             <Grid gap>
               <Box xs={12}>
+                <Text variant="title">{t('Password expired, set a new one')}.</Text>
+              </Box>
+              <Box xs={12}>
                 <Input label={t('Password *')} name="password" value={changePasswordConn?.password} />
               </Box>
               <Box xs={12}>

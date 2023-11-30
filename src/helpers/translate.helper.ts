@@ -26,6 +26,7 @@ const tokens = {
     Name: 'Nome',
     'New Tab': 'Nova Aba',
     Password: 'Senha',
+    'Password expired, set a new one': 'Senha expirada, defina uma nova',
     Port: 'Porta',
     Query: 'Consulta',
     Refresh: 'Atualizar',
