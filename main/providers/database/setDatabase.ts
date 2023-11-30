@@ -2,16 +2,12 @@ import { ConnRef } from '../../types/database.type';
 import connect from './connect';
 
 export default async function setDatabase(conn: ConnRef, database: string) {
-  if (conn.type === 'pg') {
-    await conn.current.destroy();
+  await conn.current.destroy();
 
-    conn.current = await connect({
-      ...conn,
-      database,
-    });
-  } else {
-    await conn.current.raw(`USE ${database}`);
-  }
+  conn.current = await connect({
+    ...conn,
+    database,
+  });
 
   conn.database = database;
 
