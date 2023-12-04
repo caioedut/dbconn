@@ -36,7 +36,7 @@ const parseHTML = (text: string) => {
 const sqlToAst = (sql: string) => {
   const froms: { alias: null | string; table: string }[] = [];
 
-  const regex = new RegExp(PRIMARY.join('|'), 'ig');
+  const regex = new RegExp(PRIMARY.join('|') + '\b', 'ig');
   const splitted = sql
     .replace(regex, (substr) => `$///$${substr}`.toUpperCase().trim())
     .split('$///$')
