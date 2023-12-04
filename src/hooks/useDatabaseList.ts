@@ -1,33 +1,29 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useStoreState } from 'react-state-hooks';
 
 import useApiOnce from '@/hooks/useApiOnce';
 import { Connection, Database } from '@/types/database.type';
 
-export type UseDatabaseListProps = {
-  connection?: Connection;
-};
+export default function useDatabaseList(connection?: Connection) {
+  const index = useMemo(() => `${connection?.id ?? ''}`, [connection?.id]);
 
-export default function useDatabaseList({ connection }: UseDatabaseListProps) {
   const [cache, setCache] = useStoreState<{
     [key: string]: Database[] | undefined;
-  }>('connection.databases', {});
+  }>('databases', {});
 
-  const defaultCurrent = cache[connection?.id as string];
-
-  const { data = defaultCurrent, ...rest } = useApiOnce<Database[]>(
-    connection && '/connections/databases',
+  const { data = cache[index], ...rest } = useApiOnce<Database[]>(
+    connection?.id && '/connections/databases',
     connection?.id,
   );
 
-  useMemo(() => {
-    if (!connection?.id) return;
+  useEffect(() => {
+    if (!index) return;
 
     setCache((current) => ({
       ...current,
-      [connection.id]: data,
+      [index]: data,
     }));
-  }, [connection, data, setCache]);
+  }, [index, data, setCache]);
 
   return { data, ...rest };
 }

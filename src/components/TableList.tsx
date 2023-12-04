@@ -1,6 +1,5 @@
 import { memo, startTransition, useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 
-import { RbkInputEvent } from '@react-bulk/core';
 import { Box, Button, Input, Scrollable, Tabs } from '@react-bulk/web';
 
 import Icon from '@/components/Icon';
@@ -10,10 +9,9 @@ import TableListItem from '@/components/TableListItem';
 import VirtualizedList from '@/components/VirtualizedList';
 import { string } from '@/helpers/string.helper';
 import { t } from '@/helpers/translate.helper';
-import useApiOnce from '@/hooks/useApiOnce';
 import useConnection from '@/hooks/useConnection';
 import useHotkey from '@/hooks/useHotkey';
-import { Table } from '@/types/database.type';
+import useTableList from '@/hooks/useTableList';
 
 function TableList() {
   const { connection, database } = useConnection();
@@ -31,7 +29,7 @@ function TableList() {
     error: errorTables,
     isValidating: isValidatingTables,
     mutate: mutateTables,
-  } = useApiOnce<Table[]>(connection && database && '/tables', connection?.id, database?.name);
+  } = useTableList(connection, database);
 
   const handleSearch = useCallback((_: any, value: string) => {
     scrollViewRef.current?.scrollTo({ behavior: 'instant', top: 0 });

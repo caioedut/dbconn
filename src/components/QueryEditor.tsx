@@ -19,7 +19,7 @@ import { RobotoMonoFont } from '@/fonts';
 import { getError } from '@/helpers/api.helper';
 import { insertAtSelection } from '@/helpers/selection.helper';
 import useConnection from '@/hooks/useConnection';
-import useTables from '@/hooks/useTables';
+import useTableList from '@/hooks/useTableList';
 import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
 import { Connection, Database, QueryError, Result } from '@/types/database.type';
@@ -76,7 +76,7 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
   const [connection, setConnection] = useState<Connection | undefined>(connectionContext.connection);
   const [database, setDatabase] = useState<Database | undefined>(connectionContext.database);
 
-  const { getColumns, tables } = useTables(connection, database);
+  const { data: tables, getColumns } = useTableList(connection, database);
 
   const acScrollRef = useRef<Element>();
   const acSelectedRef = useRef<HTMLDivElement>();

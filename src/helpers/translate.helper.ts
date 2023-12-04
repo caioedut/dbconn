@@ -36,6 +36,7 @@ const tokens = {
     Remove: 'Remover',
     Result: 'Resultado',
     Results: 'Resultados',
+    'row(s)': 'linha(s)',
     'row(s) affected': 'linha(s) afetada(s)',
     Rows: 'Linhas',
     Save: 'Salvar',
