@@ -70,6 +70,13 @@ export default function useTabs() {
     [setProp],
   );
 
+  const setGroup = useCallback(
+    (tabId: string, group: string) => {
+      setProp(tabId, 'group', group);
+    },
+    [setProp],
+  );
+
   const goTo = useCallback(
     (index: number) => {
       const tabId = tabs[index]?.id;
@@ -97,9 +104,10 @@ export default function useTabs() {
       goToNext,
       goToPrev,
       setActive,
+      setGroup,
       setTitle,
       tabs,
     }),
-    [active, add, close, goTo, goToNext, goToPrev, setActive, setTitle, tabs],
+    [active, add, close, goTo, goToNext, goToPrev, setGroup, setActive, setTitle, tabs],
   );
 }

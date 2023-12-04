@@ -9,11 +9,22 @@ import ContextMenu from '@/components/ContextMenu';
 import Icon from '@/components/Icon';
 import Overable from '@/components/Overable';
 import QueryEditor from '@/components/QueryEditor';
+import { groupBy } from '@/helpers/array.helper';
 import { t } from '@/helpers/translate.helper';
 import useHotkey from '@/hooks/useHotkey';
 import useTabs from '@/hooks/useTabs';
 
-const tabsHeight = 36;
+const tabsHeight = 48;
+
+const colors = [
+  //
+  '#85929E',
+  '#A569BD',
+  '#52BE80',
+  '#EC7063',
+  '#5499C7',
+  '#F5B041',
+];
 
 export default function Page() {
   const theme = useTheme();
@@ -123,70 +134,89 @@ export default function Page() {
     <>
       <Box noWrap row h={tabsHeight}>
         <Scrollable ref={scrollRef} direction="horizontal" onWheel={handleScrollTabs}>
-          {tabs.map((tab) => {
-            const isActive = active === tab.id;
-            const textColor = theme.contrast(isActive ? 'primary' : 'background');
-            const title = tab.title || t('New Tab');
+          {groupBy(tabs, 'group').map(({ data, key }, index) => {
+            const groupColor = colors[index % colors.length];
 
             return (
-              <Box
-                key={tab.id}
-                id={`tab_${tab.id}`}
-                bg={isActive ? 'primary' : 'background'}
-                border="1px solid background.secondary"
-                borderRight="none"
-                position="relative"
-                px={2}
-                onPress={(e: MouseEvent) => handlePressTab(e, tab.id)}
-                onPressIn={(e: MouseEvent) => handlePressInTab(e, tab.id)}
-              >
-                <ContextMenu>
-                  <Overable p={1} onPress={(e: MouseEvent) => handleCloseTab(e, tab.id)}>
-                    <Text variant="secondary">{t('Close')}</Text>
-                  </Overable>
-                  <Overable p={1} onPress={(e: MouseEvent) => handleCloseTabsExcept(e, tab.id)}>
-                    <Text variant="secondary">{t('Close other tabs')}</Text>
-                  </Overable>
-                  <Overable p={1} onPress={(e: MouseEvent) => handleCloseTabsExcept(e, '')}>
-                    <Text variant="secondary">{t('Close all tabs')}</Text>
-                  </Overable>
-                </ContextMenu>
-
-                <Box center flex noWrap row maxw={200} title={title}>
-                  {tab.icon && (
-                    <Box mr={2}>
-                      <Icon color={isActive ? 'contrast' : 'primary'} name={tab.icon} />
-                    </Box>
-                  )}
-                  <Text flex color={textColor} numberOfLines={1} variant="secondary">
-                    {title}
+              <Box key={key}>
+                <Box bg={groupColor} p={1}>
+                  <Text center flex color={theme.contrast(groupColor)} numberOfLines={1} variant="caption">
+                    {key}&nbsp;
                   </Text>
-                  <Button
-                    circular
-                    color={textColor}
-                    ml={2}
-                    size="xsmall"
-                    title={`${t('Close')}${isActive ? ` ${closeTabHk.title}` : ''}`}
-                    variant="text"
-                    onPress={(e: MouseEvent) => handleCloseTab(e, tab.id)}
-                  >
-                    <Icon color={textColor} name="X" />
-                  </Button>
+                </Box>
+
+                <Box flex noWrap row mx="-1px">
+                  {data.map((tab) => {
+                    const isActive = active === tab.id;
+                    const textColor = theme.contrast(isActive ? 'primary' : 'background');
+                    const title = tab.title || t('New Tab');
+
+                    return (
+                      <Box
+                        key={tab.id}
+                        id={`tab_${tab.id}`}
+                        bg={isActive ? 'primary' : 'background'}
+                        border="1px solid background.secondary"
+                        borderRight="none"
+                        maxw={200}
+                        position="relative"
+                        px={2}
+                        onPress={(e: MouseEvent) => handlePressTab(e, tab.id)}
+                        onPressIn={(e: MouseEvent) => handlePressInTab(e, tab.id)}
+                      >
+                        <ContextMenu>
+                          <Overable p={1} onPress={(e: MouseEvent) => handleCloseTab(e, tab.id)}>
+                            <Text variant="secondary">{t('Close')}</Text>
+                          </Overable>
+                          <Overable p={1} onPress={(e: MouseEvent) => handleCloseTabsExcept(e, tab.id)}>
+                            <Text variant="secondary">{t('Close other tabs')}</Text>
+                          </Overable>
+                          <Overable p={1} onPress={(e: MouseEvent) => handleCloseTabsExcept(e, '')}>
+                            <Text variant="secondary">{t('Close all tabs')}</Text>
+                          </Overable>
+                        </ContextMenu>
+
+                        <Box center flex noWrap row title={title}>
+                          {tab.icon && (
+                            <Box mr={2}>
+                              <Icon color={isActive ? 'contrast' : 'primary'} name={tab.icon} />
+                            </Box>
+                          )}
+                          <Text flex color={textColor} numberOfLines={1} variant="secondary">
+                            {title}
+                          </Text>
+                          <Button
+                            circular
+                            color={textColor}
+                            ml={2}
+                            size="xsmall"
+                            title={`${t('Close')}${isActive ? ` ${closeTabHk.title}` : ''}`}
+                            variant="text"
+                            onPress={(e: MouseEvent) => handleCloseTab(e, tab.id)}
+                          >
+                            <Icon color={textColor} name="X" />
+                          </Button>
+                        </Box>
+                      </Box>
+                    );
+                  })}
                 </Box>
               </Box>
             );
           })}
 
-          <Box bg="background.secondary" p="1px" position="sticky" right={0}>
+          <Box bg="background.secondary" mt="-1px" p="1px" position="sticky" right={0}>
             <Button
               flex
               corners={0}
+              h={tabsHeight}
               style={{ boxShadow: 'none !important' }}
               title={`${t('New Tab')} ${newTabHk.title}`}
               variant="outline"
+              w={tabsHeight}
               onPress={(e: MouseEvent) => handleAddTab(e)}
             >
-              <Icon name="Plus" />
+              <Icon name="Plus" size={18} />
             </Button>
           </Box>
         </Scrollable>

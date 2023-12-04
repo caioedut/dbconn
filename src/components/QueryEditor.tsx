@@ -71,7 +71,7 @@ const sqlToAst = (sql: string) => {
 function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
   const toaster = useToaster();
   const connectionContext = useConnection();
-  const { setTitle } = useTabs();
+  const { setGroup, setTitle } = useTabs();
 
   const [connection, setConnection] = useState<Connection | undefined>(connectionContext.connection);
   const [database, setDatabase] = useState<Database | undefined>(connectionContext.database);
@@ -331,7 +331,10 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
       connection?.user ?? '-----'
     }`;
 
+    const group = [connection?.name, database?.name].filter(Boolean).join(' : ');
+
     setTitle(tabId, title);
+    setGroup(tabId, group);
   }, [tabId, setTitle, connection, database]);
 
   useEffect(() => {

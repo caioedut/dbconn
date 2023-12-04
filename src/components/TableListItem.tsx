@@ -21,7 +21,7 @@ export type TableListItemProps = {
 function TableListItem({ table }: TableListItemProps) {
   const toaster = useToaster();
 
-  const { connection } = useConnection();
+  const { connection, database } = useConnection();
 
   const { add } = useTabs();
 
@@ -35,6 +35,7 @@ function TableListItem({ table }: TableListItemProps) {
         const response = await api.get('/query/topQuery', connection?.id, tableTitle, limit);
 
         add({
+          group: [connection?.name, database?.name].filter(Boolean).join(' : '),
           icon: 'File',
           render: ({ id }) => <QueryEditor autoRun sql={response.data} tabId={id} />,
         });
@@ -42,16 +43,17 @@ function TableListItem({ table }: TableListItemProps) {
         toaster.error(getError(err));
       }
     },
-    [tableTitle, add, connection?.id, toaster],
+    [tableTitle, add, connection?.id, database?.name, toaster],
   );
 
   const handleTableDetails = useCallback(() => {
     add({
       title: table.name,
+      group: [connection?.name, database?.name].filter(Boolean).join(' : '),
       icon: 'Table',
       render: () => <TableDetails connection={connection} table={table} />,
     });
-  }, [add, connection, table]);
+  }, [add, connection, database, table]);
 
   return (
     <Overable key={table.name} style={{ cursor: 'pointer' }} onDoubleClick={handleTableDetails}>

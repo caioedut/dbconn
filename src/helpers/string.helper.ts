@@ -77,6 +77,8 @@ export function stripTags(input: any | string, allowed?: any | string) {
 }
 
 export function color(input: any | string) {
+  input = string(input);
+
   let hash = 0;
   let colour = '#';
 
