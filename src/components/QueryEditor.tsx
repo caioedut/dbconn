@@ -18,16 +18,14 @@ import { CONTEXT, PRIMARY } from '@/constants/SQL';
 import { RobotoMonoFont } from '@/fonts';
 import { getError } from '@/helpers/api.helper';
 import { insertAtSelection } from '@/helpers/selection.helper';
-import useConnection from '@/hooks/useConnection';
+import useCurrentTab from '@/hooks/useCurrentTab';
 import useTableList from '@/hooks/useTableList';
-import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
-import { Connection, Database, QueryError, Result } from '@/types/database.type';
+import { QueryError, Result } from '@/types/database.type';
 
 export type QueryEditorProps = {
   autoRun?: boolean;
   sql?: string;
-  tabId: string;
 };
 
 const parseHTML = (text: string) => {
@@ -68,13 +66,10 @@ const sqlToAst = (sql: string) => {
   return { froms, type };
 };
 
-function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
+function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
   const toaster = useToaster();
-  const connectionContext = useConnection();
-  const { setGroup, setTitle } = useTabs();
 
-  const [connection, setConnection] = useState<Connection | undefined>(connectionContext.connection);
-  const [database, setDatabase] = useState<Database | undefined>(connectionContext.database);
+  const { connection, database } = useCurrentTab();
 
   const { data: tables, getColumns } = useTableList(connection, database);
 
@@ -313,29 +308,6 @@ function QueryEditor({ autoRun, sql = '', tabId }: QueryEditorProps) {
     // editorRef.current!.innerHTML = parseHTML($editor.innerText);
     // restoreSelection($editor, selection);
   }, []);
-
-  useEffect(() => {
-    if (!connection) {
-      setConnection(connectionContext.connection);
-    }
-  }, [connectionContext.connection, connection]);
-
-  useEffect(() => {
-    if (!database) {
-      setDatabase(connectionContext.database);
-    }
-  }, [connectionContext.database, database]);
-
-  useEffect(() => {
-    const title = `${(connection?.name || connection?.host) ?? '-----'} /// ${database?.name ?? '-----'} /// ${
-      connection?.user ?? '-----'
-    }`;
-
-    const group = [connection?.name, database?.name].filter(Boolean).join(' : ');
-
-    setTitle(tabId, title);
-    setGroup(tabId, group);
-  }, [tabId, setTitle, connection, database]);
 
   useEffect(() => {
     if (!editorRef.current) return;

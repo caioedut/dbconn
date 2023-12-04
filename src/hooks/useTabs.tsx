@@ -5,8 +5,13 @@ import { ReactElement } from '@react-bulk/core';
 import { v4 as uuid } from 'uuid';
 
 import QueryEditor from '@/components/QueryEditor';
+import useConnection from '@/hooks/useConnection';
+import { Connection, Database } from '@/types/database.type';
 
 export type Tab = {
+  connection?: Connection;
+  database?: Database;
+  group?: string;
   icon?: string;
   id: string;
   render: (props: Omit<Tab, 'render'>) => ReactElement;
@@ -20,21 +25,37 @@ export default function useTabs() {
     {
       id: '0',
       title: 'Query',
+      connection,
+      database,
+      group: [connection?.name, database?.name].filter(Boolean).join(' : '),
       icon: 'File',
-      render: () => <QueryEditor tabId="0" />,
+      render: () => <QueryEditor />,
     },
   ]);
 
+  const getMetaData = useCallback(
+    (tab?: Partial<Tab>) => {
+      const conn = tab?.connection ?? connection;
+      const db = tab?.database ?? database;
+
+      const group = [conn?.name, db?.name].filter(Boolean).join(' : ');
+      const title = `${(conn?.name || conn?.host) ?? '-----'} /// ${db?.name ?? '-----'} /// ${conn?.user ?? '-----'}`;
+
+      return { title, group };
+    },
+    [connection, database],
+  );
+
   const add = useCallback(
-    (tab: Partial<Omit<Tab, 'id'>>) => {
+    (tab: Partial<Omit<Tab, 'group' | 'id'>>) => {
       const id = uuid();
 
       setActive(id);
-      setTabs((current) => [...current, { ...tab, id } as Tab]);
+      setTabs((current) => [...current, { ...getMetaData(tab), ...tab, id } as Tab]);
 
       return id;
     },
-    [setActive, setTabs],
+    [getMetaData, setActive, setTabs],
   );
 
   const close = useCallback(
@@ -57,10 +78,13 @@ export default function useTabs() {
 
       if (tab && tab?.[prop as keyof typeof tab] !== value) {
         tab[prop as keyof typeof tab] = value;
+
+        Object.assign(tab, getMetaData(tab));
+
         setTabs((current) => [...current]);
       }
     },
-    [setTabs, tabs],
+    [getMetaData, setTabs, tabs],
   );
 
   const setTitle = useCallback(
@@ -105,9 +129,10 @@ export default function useTabs() {
       goToPrev,
       setActive,
       setGroup,
+      setProp,
       setTitle,
       tabs,
     }),
-    [active, add, close, goTo, goToNext, goToPrev, setGroup, setActive, setTitle, tabs],
+    [active, add, close, goTo, goToNext, goToPrev, setActive, setGroup, setProp, setTitle, tabs],
   );
 }

@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useToaster } from '@react-bulk/core';
 import { Box, Button, Text } from '@react-bulk/web';
@@ -18,10 +18,10 @@ export type TableListItemProps = {
   table: Table;
 };
 
-function TableListItem({ table }: TableListItemProps) {
+export default function TableListItem({ table }: TableListItemProps) {
   const toaster = useToaster();
 
-  const { connection, database } = useConnection();
+  const { connection } = useConnection();
 
   const { add } = useTabs();
 
@@ -35,25 +35,23 @@ function TableListItem({ table }: TableListItemProps) {
         const response = await api.get('/query/topQuery', connection?.id, tableTitle, limit);
 
         add({
-          group: [connection?.name, database?.name].filter(Boolean).join(' : '),
           icon: 'File',
-          render: ({ id }) => <QueryEditor autoRun sql={response.data} tabId={id} />,
+          render: () => <QueryEditor autoRun sql={response.data} />,
         });
       } catch (err) {
         toaster.error(getError(err));
       }
     },
-    [tableTitle, add, connection?.id, database?.name, toaster],
+    [tableTitle, add, connection?.id, toaster],
   );
 
   const handleTableDetails = useCallback(() => {
     add({
       title: table.name,
-      group: [connection?.name, database?.name].filter(Boolean).join(' : '),
       icon: 'Table',
-      render: () => <TableDetails connection={connection} table={table} />,
+      render: () => <TableDetails table={table} />,
     });
-  }, [add, connection, database, table]);
+  }, [add, table]);
 
   return (
     <Overable key={table.name} style={{ cursor: 'pointer' }} onDoubleClick={handleTableDetails}>
@@ -87,5 +85,3 @@ function TableListItem({ table }: TableListItemProps) {
     </Overable>
   );
 }
-
-export default memo(TableListItem);

@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useListState } from 'react-state-hooks';
 
 import { useTheme } from '@react-bulk/core';
-import { Box, Checkbox, Divider, Grid, Loading, Scrollable, Text } from '@react-bulk/web';
+import { Box, Checkbox, Divider, Loading, Scrollable, Text } from '@react-bulk/web';
 
 import Icon from '@/components/Icon';
 import Overable from '@/components/Overable';
@@ -11,15 +11,17 @@ import State from '@/components/State';
 import TableResults from '@/components/TableResults';
 import { t } from '@/helpers/translate.helper';
 import useApiOnce from '@/hooks/useApiOnce';
-import { Column, Connection, Table } from '@/types/database.type';
+import useCurrentTab from '@/hooks/useCurrentTab';
+import { Column, Connection, Database, Table } from '@/types/database.type';
 
 export type TableDetailsProps = {
-  connection?: Connection;
   table: Table;
 };
 
-export default function TableDetails({ connection, table }: TableDetailsProps) {
+export default function TableDetails({ table }: TableDetailsProps) {
   const theme = useTheme();
+
+  const { connection } = useCurrentTab();
 
   const [hiddenColumns, { push, remove }] = useListState<string>();
 

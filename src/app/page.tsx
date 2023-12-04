@@ -9,6 +9,7 @@ import ContextMenu from '@/components/ContextMenu';
 import Icon from '@/components/Icon';
 import Overable from '@/components/Overable';
 import QueryEditor from '@/components/QueryEditor';
+import { CurrentTabProvider } from '@/contexts/CurrentTabContext';
 import { groupBy } from '@/helpers/array.helper';
 import { t } from '@/helpers/translate.helper';
 import useHotkey from '@/hooks/useHotkey';
@@ -35,7 +36,7 @@ export default function Page() {
   const addQueryEditorTab = useCallback(() => {
     add({
       icon: 'File',
-      render: ({ id }) => <QueryEditor tabId={id} />,
+      render: () => <QueryEditor />,
     });
   }, [add]);
 
@@ -141,7 +142,7 @@ export default function Page() {
               <Box key={key}>
                 <Box bg={groupColor} p={1}>
                   <Text center flex color={theme.contrast(groupColor)} numberOfLines={1} variant="caption">
-                    {key}&nbsp;
+                    &nbsp;{key}&nbsp;
                   </Text>
                 </Box>
 
@@ -226,9 +227,11 @@ export default function Page() {
         const isActive = active === tab.id;
 
         return (
-          <Box key={tab.id} h={`calc(100% - ${tabsHeight}px)`} hidden={!isActive}>
-            {render(tab)}
-          </Box>
+          <CurrentTabProvider key={tab.id} tabId={tab.id}>
+            <Box h={`calc(100% - ${tabsHeight}px)`} hidden={!isActive}>
+              {render(tab)}
+            </Box>
+          </CurrentTabProvider>
         );
       })}
     </>

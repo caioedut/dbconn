@@ -6,6 +6,7 @@ import State from '@/components/State';
 import { getError } from '@/helpers/api.helper';
 import useApiOnce from '@/hooks/useApiOnce';
 import useConnection from '@/hooks/useConnection';
+import useTabs from '@/hooks/useTabs';
 import api from '@/services/api';
 import { Connection, Database } from '@/types/database.type';
 
@@ -18,6 +19,8 @@ export default function DatabaseList({ connection }: DatabaseListItemProps) {
 
   const { database, setConnection, setDatabase } = useConnection();
 
+  const { setProp, tabs } = useTabs();
+
   const isConnected = Boolean(connection.connected);
 
   const { data: databases, error: errorDatabases } = useApiOnce<Database[]>(
@@ -28,14 +31,23 @@ export default function DatabaseList({ connection }: DatabaseListItemProps) {
   const handleSelectDatabase = async (e: Event, db: Database) => {
     e.stopPropagation();
 
-    if (db.name !== database?.name) {
-      try {
-        await api.post('/connections/databases', connection.id, db.name);
-        setConnection(connection);
-        setDatabase(db);
-      } catch (err) {
-        toaster.error(getError(err));
+    if (db.name === database?.name) {
+      return;
+    }
+
+    tabs.forEach((tab) => {
+      if (!tab.database?.name) {
+        setProp(tab.id, 'connection', connection);
+        setProp(tab.id, 'database', db);
       }
+    });
+
+    try {
+      await api.post('/connections/databases', connection.id, db.name);
+      setConnection(connection);
+      setDatabase(db);
+    } catch (err) {
+      toaster.error(getError(err));
     }
   };
 
