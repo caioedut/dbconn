@@ -1,27 +1,24 @@
-import { Fragment, createContext, useCallback, useMemo, useState } from 'react';
+import { Fragment, createContext, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Box, Divider, Text } from '@react-bulk/web';
 
 import useConnection from '@/hooks/useConnection';
-import useTabs from '@/hooks/useTabs';
+import useTabs, { Tab } from '@/hooks/useTabs';
 
 const CurrentTabContext = createContext({
   tabs: {},
 } as any);
 
 function CurrentTabProvider({ children, tabId }: any) {
-  const { tabs } = useTabs();
+  const { setProp, tabs } = useTabs();
 
   const connContext = useConnection();
 
-  const tab = useMemo(() => tabs.find(({ id }) => id === tabId), [tabId, tabs]);
+  const tab = useMemo(() => tabs.find(({ id }) => id === tabId), [tabId, tabs]) as Tab;
 
-  const connection = useMemo(
-    () => tab?.connection ?? connContext?.connection,
-    [connContext?.connection, tab?.connection],
-  );
+  const connection = useMemo(() => tab?.connection, [tab?.connection]);
 
-  const database = useMemo(() => tab?.database ?? connContext?.database, [connContext?.database, tab?.database]);
+  const database = useMemo(() => tab?.database, [tab?.database]);
 
   const [footer, _setFooter] = useState<(string | undefined)[]>([connection?.user]);
 
@@ -31,6 +28,16 @@ function CurrentTabProvider({ children, tabId }: any) {
     },
     [connection?.user],
   );
+
+  useEffect(() => {
+    if (!tab?.connection?.id) {
+      setProp(tab?.id, 'connection', connContext.connection);
+    }
+
+    if (!tab?.database?.name) {
+      setProp(tab?.id, 'database', connContext.database);
+    }
+  }, [connContext, setProp, tab]);
 
   return (
     <CurrentTabContext.Provider
