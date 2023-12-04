@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import { useTheme } from '@react-bulk/core';
 import { Box, Divider, Scrollable, Text } from '@react-bulk/web';
 
 import VirtualizedList from '@/components/VirtualizedList';
@@ -12,6 +13,7 @@ export type TableResultsProps = {
 };
 
 export default function TableResults({ fields, rows }: TableResultsProps) {
+  const theme = useTheme();
   const scrollViewRef = useRef<Element>();
 
   const [resultsSelected, setResultsSelected] = useState<[number, string]>();
@@ -113,8 +115,12 @@ export default function TableResults({ fields, rows }: TableResultsProps) {
                     key={columnIndex}
                     component="td"
                     noRootStyles
-                    bg={isSelected ? 'primary.main.35' : undefined}
-                    style={cellStyle}
+                    style={[
+                      cellStyle,
+                      isSelected && {
+                        backgroundColor: `${theme.color('primary.main.35')} !important`,
+                      },
+                    ]}
                     onPress={() => setResultsSelected([rowIndex, column.name])}
                   >
                     <Text numberOfLines={1} variant="secondary">
