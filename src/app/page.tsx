@@ -227,11 +227,9 @@ export default function Page() {
         const isActive = active === tab.id;
 
         return (
-          <CurrentTabProvider key={tab.id} tabId={tab.id}>
-            <Box h={`calc(100% - ${tabsHeight}px)`} hidden={!isActive}>
-              {render(tab)}
-            </Box>
-          </CurrentTabProvider>
+          <Box key={tab.id} h={`calc(100% - ${tabsHeight}px)`} hidden={!isActive}>
+            <CurrentTabProvider tabId={tab.id}>{render(tab)}</CurrentTabProvider>
+          </Box>
         );
       })}
     </>

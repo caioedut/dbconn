@@ -38,6 +38,7 @@ const tokens = {
     Results: 'Resultados',
     'row(s)': 'linha(s)',
     'row(s) affected': 'linha(s) afetada(s)',
+    'row(s) of': 'linha(s) de',
     Rows: 'Linhas',
     Save: 'Salvar',
     'Save Password': 'Salvar Senha',
