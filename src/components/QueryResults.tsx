@@ -31,10 +31,10 @@ function QueryResults({ data }: QueryResultsProps) {
           tabs={(data || []).map((result, index) => ({
             label: (
               <>
-                <Text bold color={theme.contrast('primary')} letterSpacing={1} variant="caption">
+                <Text bold color={tab === index ? 'primary.contrast' : undefined} letterSpacing={1} variant="caption">
                   {t('RESULT')} #{index + 1}
                 </Text>
-                <Text right color={theme.contrast('primary')} variant="caption">
+                <Text right color={tab === index ? 'primary.contrast' : undefined} variant="caption">
                   {'error' in result ? t('ERROR') : `${result.affectedRows ?? result.rows.length} ${t('row(s)')}`}
                 </Text>
               </>
