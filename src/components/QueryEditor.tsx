@@ -91,8 +91,6 @@ function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
     const selection = window.getSelection();
     const text = (selection?.toString() || editorRef.current?.innerText || '').trim();
 
-    console.log(connection);
-
     if (text) {
       try {
         const response = await api.post('/query', connection?.id, text);

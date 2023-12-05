@@ -1,6 +1,5 @@
 import React, { memo, useEffect, useState } from 'react';
 
-import { useTheme } from '@react-bulk/core';
 import { Box, Tabs, Text } from '@react-bulk/web';
 
 import Panel from '@/components/Panel';
@@ -14,8 +13,6 @@ export type QueryResultsProps = {
 };
 
 function QueryResults({ data }: QueryResultsProps) {
-  const theme = useTheme();
-
   const { setFooter } = useCurrentTab();
 
   const [tab, setTab] = useState(0);
