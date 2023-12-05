@@ -59,7 +59,7 @@ function CurrentTabProvider({ children, tabId }: any) {
             <Fragment key={index}>
               {index > 0 && <Divider vertical mx={2} />}
 
-              <Text color="contrast" variant="secondary">
+              <Text color="primary.contrast" variant="secondary">
                 {text}
               </Text>
             </Fragment>

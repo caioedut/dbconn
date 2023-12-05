@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@react-bulk/core": "^0.6.2",
-    "@react-bulk/web": "^0.6.1",
+    "@react-bulk/web": "^0.6.2",
     "autoprefixer": "^10.4.15",
     "caret-pos": "^2.0.0",
     "concurrently": "^8.2.1",

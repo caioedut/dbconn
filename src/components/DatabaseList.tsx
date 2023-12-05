@@ -1,5 +1,7 @@
+import { useState } from 'react';
+
 import { useToaster } from '@react-bulk/core';
-import { Box, Text } from '@react-bulk/web';
+import { Box, Loading, Text } from '@react-bulk/web';
 
 import Icon from '@/components/Icon';
 import State from '@/components/State';
@@ -21,6 +23,8 @@ export default function DatabaseList({ connection }: DatabaseListItemProps) {
 
   const { setProp, tabs } = useTabs();
 
+  const [loadingDb, setLoadingDb] = useState<string>();
+
   const isConnected = Boolean(connection.connected);
 
   const { data: databases, error: errorDatabases } = useApiOnce<Database[]>(
@@ -34,6 +38,8 @@ export default function DatabaseList({ connection }: DatabaseListItemProps) {
     if (db.name === database?.name) {
       return;
     }
+
+    setLoadingDb(db.name);
 
     tabs.forEach((tab) => {
       if (!tab.database?.name) {
@@ -49,6 +55,8 @@ export default function DatabaseList({ connection }: DatabaseListItemProps) {
     } catch (err) {
       toaster.error(getError(err));
     }
+
+    setLoadingDb(undefined);
   };
 
   if (!isConnected) {
@@ -69,7 +77,11 @@ export default function DatabaseList({ connection }: DatabaseListItemProps) {
             >
               <Box center noWrap row p={1}>
                 <Box center h={14} ml={1} title="Selected" w={14}>
-                  {isSelected && <Icon name="ChevronsRight" size={14} />}
+                  {loadingDb === db.name ? (
+                    <Loading size={0.75} />
+                  ) : isSelected ? (
+                    <Icon name="ChevronsRight" size={14} />
+                  ) : null}
                 </Box>
                 <Text
                   flex
