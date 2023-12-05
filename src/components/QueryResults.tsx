@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 
 import { useTheme } from '@react-bulk/core';
 import { Box, Tabs, Text } from '@react-bulk/web';
@@ -6,6 +6,7 @@ import { Box, Tabs, Text } from '@react-bulk/web';
 import Panel from '@/components/Panel';
 import TableResults from '@/components/TableResults';
 import { t } from '@/helpers/translate.helper';
+import useCurrentTab from '@/hooks/useCurrentTab';
 import { QueryError, Result } from '@/types/database.type';
 
 export type QueryResultsProps = {
@@ -15,7 +16,13 @@ export type QueryResultsProps = {
 function QueryResults({ data }: QueryResultsProps) {
   const theme = useTheme();
 
+  const { setFooter } = useCurrentTab();
+
   const [tab, setTab] = useState(0);
+
+  useEffect(() => {
+    setFooter([`${(data?.[tab] as Result)?.rows?.length ?? 0} ${t('row(s)')}`]);
+  }, [data, setFooter, tab]);
 
   return (
     <Box h="100%">

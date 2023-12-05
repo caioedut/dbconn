@@ -17,6 +17,7 @@ const base: ThemeEditProps = {
     Toaster: {
       defaultProps: {
         halign: 'right',
+        // offset: { y: 11 },
       },
     },
   },

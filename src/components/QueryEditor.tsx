@@ -18,7 +18,6 @@ import { CONTEXT, PRIMARY } from '@/constants/SQL';
 import { RobotoMonoFont } from '@/fonts';
 import { getError } from '@/helpers/api.helper';
 import { insertAtSelection } from '@/helpers/selection.helper';
-import { t } from '@/helpers/translate.helper';
 import useCurrentTab from '@/hooks/useCurrentTab';
 import useTableList from '@/hooks/useTableList';
 import api from '@/services/api';
@@ -70,7 +69,7 @@ const sqlToAst = (sql: string) => {
 function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
   const toaster = useToaster();
 
-  const { connection, database, setFooter } = useCurrentTab();
+  const { connection, database } = useCurrentTab();
 
   const { data: tables, getColumns } = useTableList(connection, database);
 
@@ -91,6 +90,8 @@ function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
 
     const selection = window.getSelection();
     const text = (selection?.toString() || editorRef.current?.innerText || '').trim();
+
+    console.log(connection);
 
     if (text) {
       try {
@@ -331,12 +332,6 @@ function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editorRef]);
-
-  useEffect(() => {
-    if (results) {
-      setFooter([`${results?.length} ${t('row(s)')}`]);
-    }
-  }, [results, setFooter]);
 
   return (
     <>

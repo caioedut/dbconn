@@ -16,9 +16,12 @@ function CurrentTabProvider({ children, tabId }: any) {
 
   const tab = useMemo(() => tabs.find(({ id }) => id === tabId), [tabId, tabs]) as Tab;
 
-  const connection = useMemo(() => tab?.connection, [tab?.connection]);
+  const connection = useMemo(
+    () => tab?.connection ?? connContext?.connection,
+    [connContext?.connection, tab?.connection],
+  );
 
-  const database = useMemo(() => tab?.database, [tab?.database]);
+  const database = useMemo(() => tab?.database ?? connContext?.database, [connContext?.database, tab?.database]);
 
   const [footer, _setFooter] = useState<(string | undefined)[]>([connection?.user]);
 
