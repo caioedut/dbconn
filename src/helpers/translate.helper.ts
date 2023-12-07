@@ -20,6 +20,7 @@ const tokens = {
     'Delete connection?': 'Remover conexão?',
     Disconnect: 'Desconectar',
     Disconnected: 'Desconectado',
+    'Do you want to perform DELETE without WHERE?': 'Deseja executar o DELETE sem WHERE?',
     Edit: 'Editar',
     Empty: 'Vazio',
     Error: 'Erro',

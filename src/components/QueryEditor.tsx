@@ -18,6 +18,7 @@ import { CONTEXT, PRIMARY } from '@/constants/SQL';
 import { RobotoMonoFont } from '@/fonts';
 import { getError } from '@/helpers/api.helper';
 import { insertAtSelection } from '@/helpers/selection.helper';
+import { t } from '@/helpers/translate.helper';
 import useCurrentTab from '@/hooks/useCurrentTab';
 import useTableList from '@/hooks/useTableList';
 import api from '@/services/api';
@@ -93,19 +94,28 @@ function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
   };
 
   const sendQuery = useCallback(async () => {
-    setIsLoading(true);
     setResults(undefined);
 
     const selection = window.getSelection();
     const text = (selection?.toString() || editorRef.current?.innerText || '').trim();
 
-    if (text) {
-      try {
-        const response = await api.post('/query', connection?.id, text);
-        setResults(response?.data);
-      } catch (err) {
-        toaster.error(getError(err));
+    if (!text) {
+      return;
+    }
+
+    if (text.toUpperCase().includes('DELETE') && !text.toUpperCase().includes('WHERE')) {
+      if (!window.confirm(t('Do you want to perform DELETE without WHERE?'))) {
+        return;
       }
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await api.post('/query', connection?.id, text);
+      setResults(response?.data);
+    } catch (err) {
+      toaster.error(getError(err));
     }
 
     setIsLoading(false);

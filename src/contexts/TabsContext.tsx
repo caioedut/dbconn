@@ -37,26 +37,7 @@ function TabsProvider({ children }: any) {
 
   const { connection, database } = useConnection();
 
-  const [tabs, setTabs] = useStoreState<Tab[]>('tabs', [
-    {
-      id: '0',
-      title: 'Query',
-      connection,
-      database,
-      group: [connection?.name, database?.name].filter(Boolean).join(' : '),
-      icon: 'File',
-      render: () => <QueryEditor />,
-    },
-    {
-      id: '1',
-      title: 'Query',
-      connection,
-      database,
-      group: [connection?.name, database?.name].filter(Boolean).join(' : '),
-      icon: 'File',
-      render: () => <QueryEditor />,
-    },
-  ]);
+  const [tabs, setTabs] = useStoreState<Tab[]>('tabs', []);
 
   const getMetaData = useCallback(
     (tab?: Partial<Tab>) => {
