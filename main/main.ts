@@ -1,12 +1,18 @@
 import { spawn } from 'child_process';
-import { BrowserWindow, app, ipcMain } from 'electron';
+import { BrowserWindow, app, ipcMain, session } from 'electron';
 import serve from 'electron-serve';
 import { existsSync, rmSync } from 'fs';
+import os from 'os';
 import path from 'path';
 
 import api from './api';
 
 const isProd = process.env.NODE_ENV !== 'development';
+
+const reactDevToolsPath = path.join(
+  os.homedir(),
+  'AppData/Local/Microsoft/Edge/User Data/Default/Extensions/gpphkfbcpidddadnkolkpfckpihlkkil/4.28.5_0',
+);
 
 if (isProd) {
   serve({ directory: 'out' });
@@ -14,7 +20,9 @@ if (isProd) {
   app.setPath('userData', `${app.getPath('userData')} (development)`);
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  await session.defaultSession.loadExtension(reactDevToolsPath);
+
   const splash = new BrowserWindow({
     frame: false,
     height: 180,

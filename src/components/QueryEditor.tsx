@@ -73,6 +73,8 @@ function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
 
   const { data: tables, getColumns } = useTableList(connection, database);
 
+  const [lines, setLines] = useState(0);
+
   const acScrollRef = useRef<Element>();
   const acSelectedRef = useRef<HTMLDivElement>();
   const [acIndex, setAcIndex] = useState(-1);
@@ -83,6 +85,12 @@ function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<(QueryError | Result)[]>();
+
+  const editorTextStyle = {
+    fontWeight: 500,
+    letterSpacing: 1,
+    lineHeight: 1.35,
+  };
 
   const sendQuery = useCallback(async () => {
     setIsLoading(true);
@@ -302,7 +310,10 @@ function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
   }, []);
 
   const handleChange = useCallback(async () => {
-    // const $editor = editorRef.current as HTMLDivElement;
+    const $editor = editorRef.current as HTMLDivElement;
+    const matches = $editor.innerHTML.match(/<br>/gi);
+    setLines((matches?.length ?? 0) + 1);
+
     // const selection = saveSelection($editor);
     // // TODO: highlight
     // editorRef.current!.innerHTML = parseHTML($editor.innerText);
@@ -337,39 +348,48 @@ function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
         <ResizablePanel minSizePixels={32} order={1}>
           <Panel h="100%" loading={isLoading} position="relative">
             <Scrollable>
-              <Box
-                ref={editorRef}
-                component="pre"
-                contentEditable
-                noRootStyles
-                suppressContentEditableWarning
-                autoCapitalize="none"
-                autoCorrect="off"
-                className={RobotoMonoFont.className}
-                // dangerouslySetInnerHTML={{ __html: parseHTML(sql ?? '') }}
-                h="100%"
-                m={0}
-                p={2}
-                spellCheck={false}
-                style={{
-                  '& .sql-hl-bracket': { color: 'editor.bracket' },
-                  '& .sql-hl-comment': { color: 'editor.comment', fontWeight: 400 },
-                  '& .sql-hl-function': { color: 'editor.function' },
-                  '& .sql-hl-keyword': { color: 'editor.keyword' },
-                  '& .sql-hl-number': { color: 'editor.number' },
-                  '& .sql-hl-special': { color: 'editor.special' },
-                  '& .sql-hl-string': { color: 'editor.string' },
-
-                  fontWeight: 500,
-                  letterSpacing: 1,
-                  lineHeight: 1.35,
-                  outline: 'none !important',
-                }}
-                onBlur={() => closeAutocomplete()}
-                onInput={handleChange}
-                onKeyDown={handleKeyDown}
-                onPaste={handlePaste}
-              />
+              <Box noWrap row h="100%">
+                <Box bg="background.secondary" m={0} p={2} w={40}>
+                  {Array.from({ length: lines }).map((_, index) => (
+                    <Text key={index} right color="text.disabled" style={editorTextStyle}>
+                      {index + 1}
+                    </Text>
+                  ))}
+                </Box>
+                <Box
+                  ref={editorRef}
+                  component="pre"
+                  contentEditable
+                  flex
+                  noRootStyles
+                  suppressContentEditableWarning
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  className={RobotoMonoFont.className}
+                  // dangerouslySetInnerHTML={{ __html: parseHTML(sql ?? '') }}
+                  h="100%"
+                  m={0}
+                  p={2}
+                  spellCheck={false}
+                  style={[
+                    editorTextStyle,
+                    {
+                      '& .sql-hl-bracket': { color: 'editor.bracket' },
+                      '& .sql-hl-comment': { color: 'editor.comment', fontWeight: 400 },
+                      '& .sql-hl-function': { color: 'editor.function' },
+                      '& .sql-hl-keyword': { color: 'editor.keyword' },
+                      '& .sql-hl-number': { color: 'editor.number' },
+                      '& .sql-hl-special': { color: 'editor.special' },
+                      '& .sql-hl-string': { color: 'editor.string' },
+                      outline: 'none !important',
+                    },
+                  ]}
+                  onBlur={() => closeAutocomplete()}
+                  onInput={handleChange}
+                  onKeyDown={handleKeyDown}
+                  onPaste={handlePaste}
+                />
+              </Box>
             </Scrollable>
 
             {Boolean(acPositions && acItems.length) && (

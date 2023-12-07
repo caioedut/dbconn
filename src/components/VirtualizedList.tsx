@@ -53,7 +53,7 @@ export default function VirtualizedList({
     return () => {
       $view?.removeEventListener('scroll', render);
     };
-  }, [scrollViewRef, childrenArray, rowHeight, render]);
+  }, [scrollViewRef, render]);
 
   return (
     <Box noRootStyles {...rest}>
