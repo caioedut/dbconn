@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, createContext, useCallback, useEffect, useMemo } from 'react';
+import { Dispatch, SetStateAction, createContext, useCallback, useMemo } from 'react';
 import { useStoreState } from 'react-state-hooks';
 
 import { ReactElement } from '@react-bulk/core';

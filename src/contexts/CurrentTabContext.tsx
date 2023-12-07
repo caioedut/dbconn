@@ -2,8 +2,9 @@ import { Fragment, createContext, useCallback, useEffect, useMemo, useState } fr
 
 import { Box, Divider, Text } from '@react-bulk/web';
 
+import { Tab } from '@/contexts/TabsContext';
 import useConnection from '@/hooks/useConnection';
-import useTabs, { Tab } from '@/hooks/useTabs';
+import useTabs from '@/hooks/useTabs';
 
 const CurrentTabContext = createContext({
   tabs: {},
