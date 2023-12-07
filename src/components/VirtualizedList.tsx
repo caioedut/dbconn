@@ -64,10 +64,11 @@ export default function VirtualizedList({
 
         const Component = rowFallbackComponent;
         const key = child?.key ?? index;
+        const ref = (child as any)?.ref;
         const height = child?.props?.height ?? rowHeight ?? 0;
         const width = child?.props?.width;
 
-        return <Component key={key} style={{ height, width }} />;
+        return <Component key={key} ref={ref} style={{ height, width }} />;
       })}
     </Box>
   );

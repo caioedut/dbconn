@@ -171,24 +171,20 @@ function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
 
     const text = selection.focusNode?.textContent ?? '';
     const ast = sqlToAst(text);
-
     const splitted = text.substring(0, caretPosition).split(/\s/g);
-    // .filter((cmd: string) => cmd.trim());
-
+    const context = splitted.at(-1) ?? '';
     const keyword =
       splitted
         .filter((cmd: string) => Object.keys(CONTEXT).includes(cmd.toUpperCase().trim()))
         .at(-1)
         ?.toUpperCase() ?? '';
 
-    const context = splitted.at(-1) ?? '';
-
-    console.log({ context, keyword });
+    // console.log({ context, keyword });
 
     let newItems: any[] = [];
 
     if (connection && database) {
-      if (!keyword) {
+      if (context && !keyword) {
         newItems = [...PRIMARY];
       } else {
         newItems = [...(CONTEXT?.[keyword as keyof typeof CONTEXT] ?? [])];
@@ -274,12 +270,12 @@ function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
 
         let inc = 0;
 
-        if (key === 'ArrowUp') {
+        if (key === 'ArrowUp' && acIndex > -1) {
           prevent = true;
           inc = -1;
         }
 
-        if (key === 'ArrowDown') {
+        if (key === 'ArrowDown' && acIndex < acItems.length) {
           prevent = true;
           inc = 1;
         }
@@ -293,7 +289,7 @@ function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
             }
 
             if (newIndex >= acItems.length) {
-              newIndex = acItems.length - 1;
+              newIndex = 0;
             }
 
             return newIndex;
@@ -321,8 +317,8 @@ function QueryEditor({ autoRun, sql = '' }: QueryEditorProps) {
 
   const handleChange = useCallback(async () => {
     const $editor = editorRef.current as HTMLDivElement;
-    const matches = $editor.innerHTML.match(/<br>/gi);
-    setLines((matches?.length ?? 0) + 1);
+    const match = $editor.innerHTML.match(/<div/gi);
+    setLines(match?.length ?? 1);
 
     // const selection = saveSelection($editor);
     // // TODO: highlight
