@@ -57,8 +57,6 @@ function CurrentTabProvider({ children, tabId }: any) {
 
       <Box h={28}>
         <Box center flex noWrap row bg="primary" border="1px solid primary" mt={1} p={1}>
-          <Box ml="auto" />
-
           {footer?.filter(Boolean)?.map((text, index) => (
             <Fragment key={index}>
               {index > 0 && <Divider vertical mx={2} />}
@@ -66,6 +64,8 @@ function CurrentTabProvider({ children, tabId }: any) {
               <Text color="primary.contrast" variant="secondary">
                 {text}
               </Text>
+
+              {index === 0 && <Box ml="auto" />}
             </Fragment>
           ))}
         </Box>
