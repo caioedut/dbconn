@@ -22,8 +22,8 @@ const rowHeight = 24;
 export default function Table({ columns, rows = [] }: TableProps) {
   const scrollViewRef = useRef<HTMLElement>();
 
-  const [visibleColumns, setVisibleColumns] = useState<number[]>([]);
-  const [visibleRows, setVisibleRows] = useState<number[]>([]);
+  // const [visibleColumns, setVisibleColumns] = useState<number[]>([]);
+  const [visibleRows] = useState<number[]>([]);
 
   const render = useCallback(() => {
     if (!scrollViewRef.current) return;

@@ -29,9 +29,9 @@ export type QueryEditorProps = {
   sql?: string;
 };
 
-const parseHTML = (text: string) => {
-  return highlight(text, { html: true }).replace(/\n/g, '<br>');
-};
+// const parseHTML = (text: string) => {
+//   return highlight(text, { html: true }).replace(/\n/g, '<br>');
+// };
 
 const sqlToAst = (sql: string) => {
   const froms: { alias: null | string; table: string }[] = [];

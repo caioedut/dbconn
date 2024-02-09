@@ -9,10 +9,10 @@ import { t } from '@/helpers/translate.helper';
 import useAppearance, { themes } from '@/hooks/useAppearance';
 import useSettings from '@/hooks/useSettings';
 
-const languages = [
-  { label: 'Inglês', value: 'en' },
-  { label: 'Português (BR)', value: 'pt-BR' },
-];
+// const languages = [
+//   { label: 'Inglês', value: 'en' },
+//   { label: 'Português (BR)', value: 'pt-BR' },
+// ];
 
 export default function Page() {
   const settings = useSettings();
